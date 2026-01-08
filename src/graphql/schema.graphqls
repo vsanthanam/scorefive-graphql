@@ -1,0 +1,14 @@
+type Query {
+    me: User!
+}
+
+type User {
+    id: ID!
+    displayName: String!
+    emailAddress: String
+    emailVerified: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+scalar DateTime

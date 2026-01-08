@@ -1,0 +1,3 @@
+# Apollo / GraphQL Codegen
+src/__generated__/**
+graphql.schema.json

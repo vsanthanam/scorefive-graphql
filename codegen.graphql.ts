@@ -1,0 +1,37 @@
+import type { CodegenConfig } from '@graphql-codegen/cli';
+
+const config: CodegenConfig = {
+    overwrite: true,
+    schema: 'src/graphql/schema.graphqls',
+    generates: {
+        'src/__generated__/graphql.ts': {
+            plugins: [
+                {
+                    typescript: {
+                        useTypeImports: true,
+                    },
+                },
+                {
+                    'typescript-resolvers': {
+                        contextType: '@/graphql#GraphQLContext',
+                        useTypeImports: true,
+                    },
+                },
+            ],
+            config: {
+                scalars: {
+                    DateTime: 'Date',
+                },
+                mapperTypeSuffix: 'Intermediary',
+                mappers: {
+                    User: '@/models/user.model#User',
+                },
+            },
+        },
+        './graphql.schema.json': {
+            plugins: ['introspection'],
+        },
+    },
+};
+
+export default config;

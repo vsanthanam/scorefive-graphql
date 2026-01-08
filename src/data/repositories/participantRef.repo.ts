@@ -33,11 +33,7 @@ export const participantRefRepo = (db: DB) => {
                 },
             });
         },
-        async createUserParticipantRef(
-            userId: string,
-            gameId: string,
-            turnOrder: number,
-        ): Promise<ParticipantRefRecord> {
+        async createUserParticipantRef(userId: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {
             return await db.participantRef.create({
                 data: {
                     referenceId: userId,
@@ -47,11 +43,7 @@ export const participantRefRepo = (db: DB) => {
                 },
             });
         },
-        async createSavedPlayerParticipantRef(
-            savedPlayerId: string,
-            gameId: string,
-            turnOrder: number,
-        ): Promise<ParticipantRefRecord> {
+        async createSavedPlayerParticipantRef(savedPlayerId: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {
             return await db.participantRef.create({
                 data: {
                     referenceId: savedPlayerId,
@@ -61,11 +53,7 @@ export const participantRefRepo = (db: DB) => {
                 },
             });
         },
-        async createAnonymousParticipantRef(
-            anonymousDisplayName: string,
-            gameId: string,
-            turnOrder: number,
-        ): Promise<ParticipantRefRecord> {
+        async createAnonymousParticipantRef(anonymousDisplayName: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {
             return await db.participantRef.create({
                 data: {
                     referenceId: null,
@@ -92,9 +80,7 @@ export const participantRefRepo = (db: DB) => {
                 },
             });
         },
-        async listParticipantRefsForSavedPlayerId(
-            savedPlayerId: string,
-        ): Promise<ParticipantRefRecord[]> {
+        async listParticipantRefsForSavedPlayerId(savedPlayerId: string): Promise<ParticipantRefRecord[]> {
             return await db.participantRef.findMany({
                 where: {
                     participantType: ParticipantRefType.SAVED_PLAYER,
@@ -102,9 +88,7 @@ export const participantRefRepo = (db: DB) => {
                 },
             });
         },
-        async listParticipantRefsForSavedPlayerIds(
-            savedPlayerIds: string[],
-        ): Promise<ParticipantRefRecord[]> {
+        async listParticipantRefsForSavedPlayerIds(savedPlayerIds: string[]): Promise<ParticipantRefRecord[]> {
             return await db.participantRef.findMany({
                 where: {
                     participantType: ParticipantRefType.SAVED_PLAYER,

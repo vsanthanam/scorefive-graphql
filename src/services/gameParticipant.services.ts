@@ -7,10 +7,7 @@ import type { GraphQLContext } from '@/graphql';
 import type { Game } from '@/models/game.model';
 import type { GameParticipant } from '@/models/gameParticipant.model';
 
-const assembleGameParticipant = async (
-    context: GraphQLContext,
-    record: ParticipantRefRecord,
-): Promise<{ gameParticipant: GameParticipant; turnOrder: number }> => {
+const assembleGameParticipant = async (context: GraphQLContext, record: ParticipantRefRecord): Promise<{ gameParticipant: GameParticipant; turnOrder: number }> => {
     if (record.referenceId !== null) {
         if (record.participantType === ParticipantRefType.USER) {
             const user = await userService(context).userById(record.referenceId);
@@ -19,9 +16,7 @@ const assembleGameParticipant = async (
             }
             return { gameParticipant: user, turnOrder: record.turnOrder };
         } else if (record.participantType === ParticipantRefType.SAVED_PLAYER) {
-            const savedPlayer = await savedPlayerService(context).savedPlayerById(
-                record.referenceId,
-            );
+            const savedPlayer = await savedPlayerService(context).savedPlayerById(record.referenceId);
             if (!savedPlayer) {
                 throw new Error(`SavedPlayer with ID ${record.referenceId} not found`);
             }
@@ -47,12 +42,8 @@ const assembleGameParticipant = async (
 export const gameParticipantService = (context: GraphQLContext) => {
     return {
         async orderedParticipantsForGame(game: Game): Promise<GameParticipant[]> {
-            const participantRefRecords = await context.loaders.participantRefsForGameId.load(
-                game.id,
-            );
-            const assembledParticipants = await Promise.all(
-                participantRefRecords.map((record) => assembleGameParticipant(context, record)),
-            );
+            const participantRefRecords = await context.loaders.participantRefsForGameId.load(game.id);
+            const assembledParticipants = await Promise.all(participantRefRecords.map((record) => assembleGameParticipant(context, record)));
             assembledParticipants.sort((a, b) => a.turnOrder - b.turnOrder);
             return assembledParticipants.map((ap) => ap.gameParticipant);
         },

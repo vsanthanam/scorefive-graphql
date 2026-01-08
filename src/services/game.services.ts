@@ -31,32 +31,16 @@ export const gameService = (context: GraphQLContext) => {
                         throw new Error(`Participant at index ${i} is null or undefined`);
                     }
                     if (participant.userId) {
-                        await participantRefRepo(tx).createUserParticipantRef(
-                            participant.userId,
-                            gameRecord.id,
-                            i,
-                        );
+                        await participantRefRepo(tx).createUserParticipantRef(participant.userId, gameRecord.id, i);
                     } else if (participant.savedPlayerId) {
-                        await participantRefRepo(tx).createSavedPlayerParticipantRef(
-                            participant.savedPlayerId,
-                            gameRecord.id,
-                            i,
-                        );
+                        await participantRefRepo(tx).createSavedPlayerParticipantRef(participant.savedPlayerId, gameRecord.id, i);
                     } else if (participant.anonymousDisplayName) {
                         if (participant.anonymousDisplayName.trim() === '') {
-                            throw new Error(
-                                `Anonymous participant at index ${i} must have a non-empty display name`,
-                            );
+                            throw new Error(`Anonymous participant at index ${i} must have a non-empty display name`);
                         }
-                        await participantRefRepo(tx).createAnonymousParticipantRef(
-                            participant.anonymousDisplayName,
-                            gameRecord.id,
-                            i,
-                        );
+                        await participantRefRepo(tx).createAnonymousParticipantRef(participant.anonymousDisplayName, gameRecord.id, i);
                     } else {
-                        throw new Error(
-                            `Participant at index ${i} must have either userId, savedPlayerId, or anonymousDisplayName`,
-                        );
+                        throw new Error(`Participant at index ${i} must have either userId, savedPlayerId, or anonymousDisplayName`);
                     }
                 }
                 return gameRecord.id;
@@ -124,9 +108,7 @@ export const gameService = (context: GraphQLContext) => {
                 }),
             );
         },
-        async participatingGameForAnonymousParticipant(
-            anonymousParticipant: AnonymousParticipant,
-        ): Promise<Game> {
+        async participatingGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game> {
             const ref = await context.loaders.participantRefById.load(anonymousParticipant.id);
             if (!ref) {
                 throw new Error('Participant reference not found');

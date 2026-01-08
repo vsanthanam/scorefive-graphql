@@ -27,8 +27,9 @@ const config: CodegenConfig = {
                     User: '@/models/user.model#User',
                     SavedPlayer: '@/models/savedPlayer.model#SavedPlayer',
                     Game: '@/models/game.model#Game',
-                    AnonymousParticipant:
-                        '@/models/anonymousParticipant.model#AnonymousParticipant',
+                    AnonymousParticipant: '@/models/anonymousParticipant.model#AnonymousParticipant',
+                    Hand: '@/models/hand.model#Hand',
+                    HandScore: '@/models/handScore.model#HandScore',
                 },
             },
         },

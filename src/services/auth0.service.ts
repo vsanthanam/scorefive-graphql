@@ -36,10 +36,7 @@ export const auth0Service = (db: DB) => {
                 updatedAt: user.updatedAt,
             };
         },
-        createOrUpdateUserFromAuth0: async (
-            payload: JWTPayload,
-            accessToken: string | null,
-        ): Promise<User> => {
+        createOrUpdateUserFromAuth0: async (payload: JWTPayload, accessToken: string | null): Promise<User> => {
             const sub = getString(payload, 'sub');
             if (!sub) {
                 throw new Error('Auth0 token missing sub');
@@ -56,19 +53,11 @@ export const auth0Service = (db: DB) => {
                 if (res.ok) {
                     const info = (await res.json()) as Record<string, unknown>;
                     email = typeof info.email === 'string' ? info.email : email;
-                    emailVerified =
-                        typeof info.email_verified === 'boolean'
-                            ? info.email_verified
-                            : emailVerified;
+                    emailVerified = typeof info.email_verified === 'boolean' ? info.email_verified : emailVerified;
                     nickname = typeof info.nickname === 'string' ? info.nickname : nickname;
                 }
             }
-            const user = await userRepo(db).createOrUpdateUser(
-                sub,
-                nickname ?? undefined,
-                email ?? undefined,
-                emailVerified ?? undefined,
-            );
+            const user = await userRepo(db).createOrUpdateUser(sub, nickname ?? undefined, email ?? undefined, emailVerified ?? undefined);
             return {
                 __typename: 'User',
                 id: user.id,

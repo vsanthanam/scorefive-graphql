@@ -1,10 +1,6 @@
 import { auth } from 'express-oauth2-jwt-bearer';
 
-import {
-    issuerBaseURL,
-    audienceIdentifier as audience,
-    tokenAlgorithm as tokenSigningAlg,
-} from '@/utils/env';
+import { issuerBaseURL, audienceIdentifier as audience, tokenAlgorithm as tokenSigningAlg } from '@/utils/env';
 
 import type { RequestHandler } from 'express';
 

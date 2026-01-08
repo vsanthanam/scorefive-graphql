@@ -7,9 +7,4 @@ import graphqlMiddleware from '@/server/middleware/graphql.middleware';
 
 import type { GraphQLContext } from '@/graphql';
 
-export const createMiddlewares = (server: ApolloServer<GraphQLContext>) => [
-    corsMiddleware,
-    express.json(),
-    authMiddleware,
-    graphqlMiddleware(server),
-];
+export const createMiddlewares = (server: ApolloServer<GraphQLContext>) => [corsMiddleware, express.json(), authMiddleware, graphqlMiddleware(server)];

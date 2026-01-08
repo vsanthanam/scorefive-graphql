@@ -14,12 +14,7 @@ export const userRepo = (db: DB) => {
                 where: { id },
             });
         },
-        async createOrUpdateUser(
-            id: string,
-            displayName?: string,
-            emailAddress?: string,
-            emailVerified?: boolean,
-        ): Promise<UserRecord> {
+        async createOrUpdateUser(id: string, displayName?: string, emailAddress?: string, emailVerified?: boolean): Promise<UserRecord> {
             return await db.user.upsert({
                 where: { id },
                 create: {

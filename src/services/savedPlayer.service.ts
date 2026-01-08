@@ -1,6 +1,5 @@
-import { savedPlayerRepo } from '@/data/repositories/savedPlayer.repo';
-
-import { userService } from './user.service';
+import { savedPlayerRepo } from '@/db/savedPlayer.repo';
+import { userService } from '@/services/user.service';
 
 import type { GraphQLContext } from '@/graphql';
 import type { SavedPlayer } from '@/models/savedPlayer.model';

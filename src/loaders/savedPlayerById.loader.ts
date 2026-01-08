@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 
-import { savedPlayerRepo } from '@/data/repositories/savedPlayer.repo';
+import { savedPlayerRepo } from '@/db/savedPlayer.repo';
 
 import type { DB, SavedPlayerRecord } from '@/db';
 

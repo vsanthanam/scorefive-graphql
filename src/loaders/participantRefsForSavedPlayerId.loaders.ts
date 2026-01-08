@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 
-import { participantRefRepo } from '@/data/repositories/participantRef.repo';
+import { participantRefRepo } from '@/db/participantRef.repo';
 
 import type { DB, ParticipantRefRecord } from '@/db';
 

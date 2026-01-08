@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 
-import { gameRepo } from '@/data/repositories/game.repo';
+import { gameRepo } from '@/db/game.repo';
 
 import type { DB, GameRecord } from '@/db';
 

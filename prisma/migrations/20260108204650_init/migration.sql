@@ -80,13 +80,16 @@ CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
 CREATE INDEX "Game_ownerId_idx" ON "Game"("ownerId");
 
 -- CreateIndex
-CREATE INDEX "ParticipantRef_gameId_turnOrder_idx" ON "ParticipantRef"("gameId", "turnOrder");
+CREATE INDEX "ParticipantRef_gameId_idx" ON "ParticipantRef"("gameId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ParticipantRef_id_gameId_key" ON "ParticipantRef"("id", "gameId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ParticipantRef_referenceId_gameId_key" ON "ParticipantRef"("referenceId", "gameId");
+CREATE UNIQUE INDEX "ParticipantRef_gameId_participantType_referenceId_key" ON "ParticipantRef"("gameId", "participantType", "referenceId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ParticipantRef_gameId_turnOrder_key" ON "ParticipantRef"("gameId", "turnOrder");
 
 -- CreateIndex
 CREATE INDEX "Hand_gameId_idx" ON "Hand"("gameId");
@@ -98,13 +101,7 @@ CREATE UNIQUE INDEX "Hand_handNumber_gameId_key" ON "Hand"("handNumber", "gameId
 CREATE UNIQUE INDEX "Hand_id_gameId_key" ON "Hand"("id", "gameId");
 
 -- CreateIndex
-CREATE INDEX "Score_id_handId_idx" ON "Score"("id", "handId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Score_id_handId_key" ON "Score"("id", "handId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Score_id_participantRefId_handId_key" ON "Score"("id", "participantRefId", "handId");
+CREATE UNIQUE INDEX "Score_participantRefId_handId_key" ON "Score"("participantRefId", "handId");
 
 -- AddForeignKey
 ALTER TABLE "SavedPlayer" ADD CONSTRAINT "SavedPlayer_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -31,6 +31,9 @@ export const participantRefRepo = (db: DB) => {
                 where: {
                     gameId: { in: gameIds },
                 },
+                orderBy: {
+                    turnOrder: 'asc',
+                },
             });
         },
         async createUserParticipantRef(userId: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {

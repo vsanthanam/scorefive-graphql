@@ -1,8 +1,8 @@
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express5';
 
-import { createLoaders } from '@/data/loaders';
 import { getPrismaClient } from '@/db';
+import { createLoaders } from '@/loaders';
 import { auth0Service } from '@/services/auth0.service';
 
 import type { GraphQLContext } from '@/graphql';

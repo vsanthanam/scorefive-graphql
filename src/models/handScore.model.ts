@@ -1,4 +1,4 @@
-import type { GameParticipant } from './gameParticipant.model';
+import type { GameParticipant } from '@/models/gameParticipant.model';
 
 export type HandScore = {
     __typename: 'HandScore';

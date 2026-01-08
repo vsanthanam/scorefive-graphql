@@ -1,14 +1,16 @@
-import gameById from '@/data/loaders/gameById.loader';
-import gamesForOwnerId from '@/data/loaders/gamesForOwnerId.loader';
-import participantRefById from '@/data/loaders/participantRefById.loader';
-import participantRefsForGameId from '@/data/loaders/participantRefsForGameId.loader';
-import participantRefsForSavedPlayerId from '@/data/loaders/participantRefsForSavedPlayerId.loaders';
-import participantRefsForUserId from '@/data/loaders/participantRefsForUserId.loader';
-import savedPlayerById from '@/data/loaders/savedPlayerById.loader';
-import savedPlayersForOwnerId from '@/data/loaders/savedPlayersForOwnerId.loader';
-import userById from '@/data/loaders/userById.loader';
+import gameById from '@/loaders/gameById.loader';
+import gamesForOwnerId from '@/loaders/gamesForOwnerId.loader';
+import handById from '@/loaders/handById.loader';
+import handsForGameId from '@/loaders/handsForGameId.loader';
+import participantRefById from '@/loaders/participantRefById.loader';
+import participantRefsForGameId from '@/loaders/participantRefsForGameId.loader';
+import participantRefsForSavedPlayerId from '@/loaders/participantRefsForSavedPlayerId.loaders';
+import participantRefsForUserId from '@/loaders/participantRefsForUserId.loader';
+import savedPlayerById from '@/loaders/savedPlayerById.loader';
+import savedPlayersForOwnerId from '@/loaders/savedPlayersForOwnerId.loader';
+import userById from '@/loaders/userById.loader';
 
-import type { DB, SavedPlayerRecord, UserRecord, GameRecord, ParticipantRefRecord } from '@/db';
+import type { DB, SavedPlayerRecord, UserRecord, GameRecord, ParticipantRefRecord, HandRecord } from '@/db';
 import type DataLoader from 'dataloader';
 
 export type Loaders = {
@@ -21,6 +23,8 @@ export type Loaders = {
     participantRefsForGameId: DataLoader<string, ParticipantRefRecord[]>;
     participantRefsForUserId: DataLoader<string, ParticipantRefRecord[]>;
     participantRefsForSavedPlayerId: DataLoader<string, ParticipantRefRecord[]>;
+    handsForGameId: DataLoader<string, HandRecord[]>;
+    handById: DataLoader<string, HandRecord | null>;
 };
 
 export const createLoaders = (db: DB): Loaders => {
@@ -34,5 +38,7 @@ export const createLoaders = (db: DB): Loaders => {
         participantRefsForGameId: participantRefsForGameId(db),
         participantRefsForUserId: participantRefsForUserId(db),
         participantRefsForSavedPlayerId: participantRefsForSavedPlayerId(db),
+        handsForGameId: handsForGameId(db),
+        handById: handById(db),
     };
 };

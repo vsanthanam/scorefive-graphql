@@ -11,7 +11,7 @@ import { PrismaClient } from '@/__generated__/prisma/client';
 import resolvers from '@/graphql/resolvers';
 import { introspection } from '@/utils/env';
 
-import type { Loaders } from '@/data/loaders';
+import type { Loaders } from '@/loaders';
 import type { Server } from 'node:http';
 
 export interface GraphQLContext {
@@ -37,7 +37,11 @@ if (!typeDefsPath) {
 
 const typeDefs = readFileSync(typeDefsPath, { encoding: 'utf-8' });
 
-const landingPage = [process.env.NODE_ENV === 'production' ? ApolloServerPluginLandingPageProductionDefault({ footer: false }) : ApolloServerPluginLandingPageLocalDefault({ footer: false })];
+const landingPage = [
+    process.env.NODE_ENV === 'production'
+        ? ApolloServerPluginLandingPageProductionDefault({ footer: false })
+        : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+];
 
 export const createApolloServer = (httpServer: Server) => {
     const server = new ApolloServer<GraphQLContext>({

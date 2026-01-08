@@ -7,7 +7,10 @@ import type { GraphQLContext } from '@/graphql';
 import type { Game } from '@/models/game.model';
 import type { GameParticipant } from '@/models/gameParticipant.model';
 
-const assembleGameParticipant = async (context: GraphQLContext, record: ParticipantRefRecord): Promise<{ gameParticipant: GameParticipant; turnOrder: number }> => {
+const assembleGameParticipant = async (
+    context: GraphQLContext,
+    record: ParticipantRefRecord,
+): Promise<{ gameParticipant: GameParticipant; turnOrder: number }> => {
     if (record.referenceId !== null) {
         if (record.participantType === ParticipantRefType.USER) {
             const user = await userService(context).userById(record.referenceId);
@@ -41,11 +44,22 @@ const assembleGameParticipant = async (context: GraphQLContext, record: Particip
 
 export const gameParticipantService = (context: GraphQLContext) => {
     return {
+        async buildParticipantFromRecord(record: ParticipantRefRecord): Promise<GameParticipant> {
+            const { gameParticipant } = await assembleGameParticipant(context, record);
+            return gameParticipant;
+        },
+        async gameParticipantById(id: string): Promise<GameParticipant> {
+            const record = await context.loaders.participantRefById.load(id);
+            if (!record) {
+                throw new Error(`GameParticipant with ID ${id} not found`);
+            }
+            const { gameParticipant } = await assembleGameParticipant(context, record);
+            return gameParticipant;
+        },
         async orderedParticipantsForGame(game: Game): Promise<GameParticipant[]> {
-            const participantRefRecords = await context.loaders.participantRefsForGameId.load(game.id);
-            const assembledParticipants = await Promise.all(participantRefRecords.map((record) => assembleGameParticipant(context, record)));
-            assembledParticipants.sort((a, b) => a.turnOrder - b.turnOrder);
-            return assembledParticipants.map((ap) => ap.gameParticipant);
+            const records = await context.loaders.participantRefsForGameId.load(game.id);
+            const gameParticipants = await Promise.all(records.map((record) => assembleGameParticipant(context, record)));
+            return gameParticipants.map(({ gameParticipant }) => gameParticipant);
         },
     };
 };

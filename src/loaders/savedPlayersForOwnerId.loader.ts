@@ -1,13 +1,13 @@
 import DataLoader from 'dataloader';
 
-import { gameRepo } from '@/data/repositories/game.repo';
+import { savedPlayerRepo } from '@/db/savedPlayer.repo';
 
-import type { DB, GameRecord } from '@/db';
+import type { DB, SavedPlayerRecord } from '@/db';
 
-const gamesForOwnerId = (db: DB): DataLoader<string, GameRecord[]> => {
-    return new DataLoader<string, GameRecord[]>(async (ownerIds) => {
-        const records = await gameRepo(db).listGamesForOwnerIds([...ownerIds]);
-        const cache = new Map<string, GameRecord[]>();
+const savedPlayersForOwnerId = (db: DB): DataLoader<string, SavedPlayerRecord[]> => {
+    return new DataLoader<string, SavedPlayerRecord[]>(async (ownerIds) => {
+        const records = await savedPlayerRepo(db).listSavedPlayersForOwnerIds([...ownerIds]);
+        const cache = new Map<string, SavedPlayerRecord[]>();
 
         for (const ownerId of ownerIds) {
             cache.set(ownerId, []);
@@ -26,4 +26,4 @@ const gamesForOwnerId = (db: DB): DataLoader<string, GameRecord[]> => {
     });
 };
 
-export default gamesForOwnerId;
+export default savedPlayersForOwnerId;

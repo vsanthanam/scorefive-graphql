@@ -57,6 +57,7 @@ type Game {
     hands: [Hand!]!
     createdAt: DateTime!
     updatedAt: DateTime!
+    participantScores: [ParticipantScore!]!
 }
 
 type AnonymousParticipant implements GameParticipant {
@@ -77,4 +78,10 @@ type HandScore {
     points: Int!
     participant: GameParticipant!
     hand: Hand!
+}
+
+type ParticipantScore {
+    game: Game!
+    participant: GameParticipant!
+    totalPoints: Int!
 }

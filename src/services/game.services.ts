@@ -1,7 +1,6 @@
-import { gameRepo } from '@/data/repositories/game.repo';
-import { participantRefRepo } from '@/data/repositories/participantRef.repo';
-
-import { userService } from './user.service';
+import { gameRepo } from '@/db/game.repo';
+import { participantRefRepo } from '@/db/participantRef.repo';
+import { userService } from '@/services/user.service';
 
 import type { CreateGameInput } from '@/__generated__/graphql';
 import type { GraphQLContext } from '@/graphql';

@@ -28,3 +28,12 @@ export type UserRecord = User;
 export type SavedPlayerRecord = SavedPlayer;
 export type GameRecord = Game;
 export type ParticipantRefRecord = ParticipantRef;
+export type HandRecord = Prisma.HandGetPayload<{
+    include: {
+        scores: {
+            include: {
+                participantRef: true;
+            };
+        };
+    };
+}>;

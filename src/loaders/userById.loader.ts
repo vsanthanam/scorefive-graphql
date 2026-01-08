@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 
-import { userRepo } from '@/data/repositories/user.repo';
+import { userRepo } from '@/db/user.repo';
 
 import type { DB, UserRecord } from '@/db';
 

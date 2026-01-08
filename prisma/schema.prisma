@@ -44,7 +44,7 @@ model Game {
 
 model ParticipantRef {
   id                   String             @id @default(uuid()) @db.Uuid
-  referenceId          String?            @db.Text // this should be either a saved player id, a user id, or null for an anomymous player
+  referenceId          String?            @db.Text
   participantType      ParticipantRefType
   anonymousDisplayName String?            @db.Text
   game                 Game               @relation(fields: [gameId], references: [id])
@@ -53,8 +53,9 @@ model ParticipantRef {
   scores               Score[]
 
   @@unique([id, gameId])
-  @@unique([referenceId, gameId])
-  @@index([gameId, turnOrder])
+  @@unique([gameId, participantType, referenceId])
+  @@unique([gameId, turnOrder])
+  @@index([gameId])
 }
 
 enum ParticipantRefType {
@@ -87,7 +88,5 @@ model Score {
   hand             Hand           @relation(fields: [handId], references: [id])
   handId           String         @db.Uuid
 
-  @@unique([id, handId])
-  @@unique([id, participantRefId, handId])
-  @@index([id, handId])
+  @@unique([participantRefId, handId])
 }

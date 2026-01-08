@@ -30,6 +30,7 @@ const config: CodegenConfig = {
                     AnonymousParticipant: '@/models/anonymousParticipant.model#AnonymousParticipant',
                     Hand: '@/models/hand.model#Hand',
                     HandScore: '@/models/handScore.model#HandScore',
+                    ParticipantScore: '@/models/participantScore.model#ParticipantScore',
                 },
             },
         },

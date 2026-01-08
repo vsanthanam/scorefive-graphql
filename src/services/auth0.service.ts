@@ -1,4 +1,4 @@
-import { userRepo } from '@/data/repositories/user.repo';
+import { userRepo } from '@/db/user.repo';
 import { issuerBaseURL } from '@/utils/env';
 
 import type { DB } from '@/db';

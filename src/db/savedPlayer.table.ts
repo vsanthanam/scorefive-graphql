@@ -1,7 +1,7 @@
 import type { DB, SavedPlayerRecord } from '@/db';
 import type { User } from '@/models/user.model';
 
-export const savedPlayerRepo = (db: DB) => {
+export const savedPlayerTable = (db: DB) => {
     return {
         async createSavedPlayer(owner: User, displayName: string): Promise<SavedPlayerRecord> {
             return db.savedPlayer.create({

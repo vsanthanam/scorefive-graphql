@@ -1,4 +1,4 @@
-import { userRepo } from '@/db/user.repo';
+import { userTable } from '@/db/user.table';
 import { issuerBaseURL } from '@/utils/env';
 
 import type { DB } from '@/db';
@@ -22,7 +22,7 @@ export const auth0Service = (db: DB) => {
             if (!sub) {
                 return null;
             }
-            const user = await userRepo(db).getUserById(sub);
+            const user = await userTable(db).getUserById(sub);
             if (!user) {
                 return null;
             }
@@ -57,7 +57,7 @@ export const auth0Service = (db: DB) => {
                     nickname = typeof info.nickname === 'string' ? info.nickname : nickname;
                 }
             }
-            const user = await userRepo(db).createOrUpdateUser(sub, nickname ?? undefined, email ?? undefined, emailVerified ?? undefined);
+            const user = await userTable(db).createOrUpdateUser(sub, nickname ?? undefined, email ?? undefined, emailVerified ?? undefined);
             return {
                 __typename: 'User',
                 id: user.id,

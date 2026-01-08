@@ -1,12 +1,12 @@
 import DataLoader from 'dataloader';
 
-import { savedPlayerRepo } from '@/db/savedPlayer.repo';
+import { savedPlayerTable } from '@/db/savedPlayer.table';
 
 import type { DB, SavedPlayerRecord } from '@/db';
 
 const savedPlayersForOwnerId = (db: DB): DataLoader<string, SavedPlayerRecord[]> => {
     return new DataLoader<string, SavedPlayerRecord[]>(async (ownerIds) => {
-        const records = await savedPlayerRepo(db).listSavedPlayersForOwnerIds([...ownerIds]);
+        const records = await savedPlayerTable(db).listSavedPlayersForOwnerIds([...ownerIds]);
         const cache = new Map<string, SavedPlayerRecord[]>();
 
         for (const ownerId of ownerIds) {

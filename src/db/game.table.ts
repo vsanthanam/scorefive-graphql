@@ -1,6 +1,6 @@
 import type { DB, GameRecord } from '@/db';
 
-export const gameRepo = (db: DB) => {
+export const gameTable = (db: DB) => {
     return {
         async createGame(ownerId: string, scoreLimit: number): Promise<GameRecord> {
             return db.game.create({

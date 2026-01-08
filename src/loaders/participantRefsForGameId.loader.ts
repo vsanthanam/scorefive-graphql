@@ -1,12 +1,12 @@
 import DataLoader from 'dataloader';
 
-import { participantRefRepo } from '@/db/participantRef.repo';
+import { participantRefTable } from '@/db/participantRef.table';
 
 import type { DB, ParticipantRefRecord } from '@/db';
 
 const participantRefsForGameId = (db: DB): DataLoader<string, ParticipantRefRecord[]> => {
     return new DataLoader<string, ParticipantRefRecord[]>(async (gameIds) => {
-        const records = await participantRefRepo(db).listParticipantRefsForGameIds([...gameIds]);
+        const records = await participantRefTable(db).listParticipantRefsForGameIds([...gameIds]);
         const cache = new Map<string, ParticipantRefRecord[]>();
 
         for (const gameId of gameIds) {

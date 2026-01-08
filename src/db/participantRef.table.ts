@@ -2,7 +2,7 @@ import { ParticipantRefType } from '@/__generated__/prisma/enums';
 
 import type { DB, ParticipantRefRecord } from '@/db';
 
-export const participantRefRepo = (db: DB) => {
+export const participantRefTable = (db: DB) => {
     return {
         async getParticipantRefById(id: string): Promise<ParticipantRefRecord | null> {
             return await db.participantRef.findUnique({

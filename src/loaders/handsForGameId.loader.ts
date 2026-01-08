@@ -1,12 +1,12 @@
 import DataLoader from 'dataloader';
 
-import { handRepo } from '@/db/hand.repo';
+import { handTable } from '@/db/hand.table';
 
 import type { HandRecord, DB } from '@/db';
 
 const handsForGameId = (db: DB): DataLoader<string, HandRecord[]> => {
     return new DataLoader<string, HandRecord[]>(async (gameIds) => {
-        const records = await handRepo(db).listHandsForGameIds([...gameIds]);
+        const records = await handTable(db).listHandsForGameIds([...gameIds]);
         const cache = new Map<string, HandRecord[]>();
 
         for (const record of records) {

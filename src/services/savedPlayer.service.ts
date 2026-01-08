@@ -1,4 +1,4 @@
-import { savedPlayerRepo } from '@/db/savedPlayer.repo';
+import { savedPlayerTable } from '@/db/savedPlayer.table';
 import { userService } from '@/services/user.service';
 
 import type { GraphQLContext } from '@/graphql';
@@ -46,7 +46,7 @@ export const savedPlayerService = (context: GraphQLContext) => {
             if (!displayName || displayName.trim() === '') {
                 throw new Error('Display name cannot be empty');
             }
-            const record = await savedPlayerRepo(context.db).createSavedPlayer(owner, displayName);
+            const record = await savedPlayerTable(context.db).createSavedPlayer(owner, displayName);
             return {
                 __typename: 'SavedPlayer',
                 id: record.id,

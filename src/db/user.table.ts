@@ -1,6 +1,6 @@
 import type { DB, UserRecord } from '@/db';
 
-export const userRepo = (db: DB) => {
+export const userTable = (db: DB) => {
     return {
         async listUsersByIds(userIds: string[]): Promise<UserRecord[]> {
             return db.user.findMany({

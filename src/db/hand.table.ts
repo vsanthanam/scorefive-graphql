@@ -1,6 +1,6 @@
 import type { DB, HandRecord } from '@/db';
 
-export const handRepo = (db: DB) => {
+export const handTable = (db: DB) => {
     return {
         async getHandById(id: string): Promise<HandRecord | null> {
             return db.hand.findUnique({

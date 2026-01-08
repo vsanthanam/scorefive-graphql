@@ -7,9 +7,6 @@ export const tokenAlgorithm = process.env.AUTH0_TOKEN_ALGORITHM || 'RS256';
 export const auth0ClientId = process.env.AUTH0_M2M_CLIENT_ID;
 export const auth0ClientSecret = process.env.AUTH0_M2M_CLIENT_SECRET;
 export const production = process.env.NODE_ENV === 'production';
-export const logDbQueries = process.env.LOG_DB_QUERIES === 'true';
-export const logOperationDbQueryCounts = process.env.LOG_OPERATION_DB_QUERY_COUNTS === 'true';
-export const dbLoggingEvents = logDbQueries || logOperationDbQueryCounts;
 
 export const logEnvironment = () => {
     console.log('Environment Configuration:');
@@ -21,6 +18,4 @@ export const logEnvironment = () => {
     console.log(`  INTROSPECTION: ${introspection}`);
     console.log(`  AUTH0_M2M_CLIENT_ID: ${auth0ClientId ? '[set]' : '[not set]'}`);
     console.log(`  AUTH0_M2M_CLIENT_SECRET: ${auth0ClientSecret ? '[set]' : '[not set]'}`);
-    console.log(`  LOG_DB_QUERIES: ${logDbQueries}`);
-    console.log(`  LOG_OPERATION_DB_QUERY_COUNTS: ${logOperationDbQueryCounts}`);
 };

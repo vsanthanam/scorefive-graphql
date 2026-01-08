@@ -9,7 +9,7 @@ export const userRepo = (db: DB) => {
                 },
             });
         },
-        getUserById: async (id: string): Promise<UserRecord | null> => {
+        async getUserById(id: string): Promise<UserRecord | null> {
             return await db.user.findUnique({
                 where: { id },
             });

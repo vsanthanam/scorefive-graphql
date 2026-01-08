@@ -7,19 +7,11 @@ export const userService = (context: GraphQLContext) => {
             if (!context.userId) {
                 throw new Error('Unauthorized');
             }
-            const user = await context.loaders.userById.load(context.userId);
+            const user = await this.userById(context.userId);
             if (!user) {
                 throw new Error('User not found');
             }
-            return {
-                __typename: 'User',
-                id: user.id,
-                displayName: user.displayName,
-                emailAddress: user.emailAddress,
-                emailVerified: user.emailVerified,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-            };
+            return user;
         },
         async userById(userId: string): Promise<User | null> {
             const user = await context.loaders.userById.load(userId);

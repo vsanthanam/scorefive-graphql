@@ -8,7 +8,6 @@ import { createApolloServer } from '@/graphql';
 import { createMiddlewares } from '@/server/middleware';
 import { port, logEnvironment } from '@/utils/env';
 import logger from '@/utils/logger';
-import { create } from 'node:domain';
 
 const start = async () => {
     const app = express();

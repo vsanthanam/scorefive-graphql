@@ -22,9 +22,13 @@ const config: CodegenConfig = {
                 scalars: {
                     DateTime: 'Date',
                 },
-                mapperTypeSuffix: 'Intermediary',
+                mapperTypeSuffix: 'Model',
                 mappers: {
                     User: '@/models/user.model#User',
+                    SavedPlayer: '@/models/savedPlayer.model#SavedPlayer',
+                    Game: '@/models/game.model#Game',
+                    AnonymousParticipant:
+                        '@/models/anonymousParticipant.model#AnonymousParticipant',
                 },
             },
         },

@@ -1,14 +1,80 @@
 type Query {
     me: User!
+    mySavedPlayers: [SavedPlayer!]!
+    savedPlayer(id: ID!): SavedPlayer
+    myGames: [Game!]!
+    game(id: ID!): Game
 }
 
-type User {
+type Mutation {
+    createSavedPlayer(displayName: String!): SavedPlayer!
+    createGame(input: CreateGameInput!): Game!
+}
+
+input CreateGameInput {
+    scoreLimit: Int!
+    participants: [ParticipantInput!]!
+}
+
+input ParticipantInput @oneOf {
+    userId: ID
+    savedPlayerId: ID
+    anonymousDisplayName: String
+}
+
+type User implements GameParticipant {
     id: ID!
     displayName: String!
     emailAddress: String
     emailVerified: Boolean!
     createdAt: DateTime!
     updatedAt: DateTime!
+    participatingGames: [Game!]!
 }
 
 scalar DateTime
+
+type SavedPlayer implements GameParticipant {
+    id: ID!
+    displayName: String!
+    owner: User!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    participatingGames: [Game!]!
+}
+
+interface GameParticipant {
+    id: ID!
+    displayName: String!
+    participatingGames: [Game!]!
+}
+
+type Game {
+    id: ID!
+    scoreLimit: Int!
+    owner: User!
+    orderedParticipants: [GameParticipant!]!
+    hands: [Hand!]!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type AnonymousParticipant implements GameParticipant {
+    id: ID!
+    displayName: String!
+    participatingGames: [Game!]!
+}
+
+type Hand {
+    id: ID!
+    handNumber: Int!
+    scores: [HandScore!]!
+    game: Game!
+}
+
+type HandScore {
+    id: ID!
+    points: Int!
+    participant: GameParticipant!
+    hand: Hand!
+}

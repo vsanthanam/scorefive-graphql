@@ -10,10 +10,84 @@ datasource db {
 }
 
 model User {
-  id            String   @id @unique @db.Text
-  displayName   String   @db.Text
-  emailAddress  String?  @db.Text
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+  id            String        @id @unique @db.Text
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(6)
+  displayName   String        @db.Text
+  emailAddress  String?       @db.Text
+  emailVerified Boolean       @default(false)
+  savedPlayers  SavedPlayer[]
+  games         Game[]
+}
+
+model SavedPlayer {
+  id          String   @id @default(uuid()) @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String   @db.Text
+  displayName String   @db.Text
+}
+
+model Game {
+  id              String           @id @default(uuid()) @db.Uuid
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
+  owner           User             @relation(fields: [ownerId], references: [id])
+  ownerId         String           @db.Text
+  scoreLimit      Int
+  participantRefs ParticipantRef[]
+  hands           Hand[]
+
+  @@index([ownerId])
+}
+
+model ParticipantRef {
+  id                   String             @id @default(uuid()) @db.Uuid
+  referenceId          String?            @db.Text // this should be either a saved player id, a user id, or null for an anomymous player
+  participantType      ParticipantRefType
+  anonymousDisplayName String?            @db.Text
+  game                 Game               @relation(fields: [gameId], references: [id])
+  gameId               String             @db.Uuid
+  turnOrder            Int
+  scores               Score[]
+
+  @@unique([id, gameId])
+  @@unique([referenceId, gameId])
+  @@index([gameId, turnOrder])
+}
+
+enum ParticipantRefType {
+  USER
+  SAVED_PLAYER
+  ANONYMOUS
+}
+
+model Hand {
+  id         String   @id @default(uuid()) @db.Uuid
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(6)
+  handNumber Int
+  game       Game     @relation(fields: [gameId], references: [id])
+  gameId     String   @db.Uuid
+  scores     Score[]
+
+  @@unique([handNumber, gameId])
+  @@unique([id, gameId])
+  @@index([gameId])
+}
+
+model Score {
+  id               String         @id @default(uuid()) @db.Uuid
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
+  points           Int
+  participantRef   ParticipantRef @relation(fields: [participantRefId], references: [id])
+  participantRefId String         @db.Uuid
+  hand             Hand           @relation(fields: [handId], references: [id])
+  handId           String         @db.Uuid
+
+  @@unique([id, handId])
+  @@unique([id, participantRefId, handId])
+  @@index([id, handId])
 }

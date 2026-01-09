@@ -2,14 +2,16 @@ import DataLoader from 'dataloader';
 
 import { participantRefTable } from '@/db/participantRef.table';
 
-import type { DB, ParticipantRefRecord } from '@/db';
+import type { ParticipantRefRecord, DB } from '@/db';
 
-const participantRefById = (db: DB): DataLoader<string, ParticipantRefRecord | null> => {
-    return new DataLoader<string, ParticipantRefRecord | null>(async (participantRefIds) => {
-        const records = await participantRefTable(db).listParticipantRefsForIds([...participantRefIds]);
-        const cache = new Map(records.map((record) => [record.id, record]));
-
-        return participantRefIds.map((id) => cache.get(id) ?? null);
+export const participantRefById = (db: DB) => {
+    return new DataLoader<string, ParticipantRefRecord | null>(async (ids) => {
+        const records = await participantRefTable(db).listParticipantRefsByIds([...ids]);
+        const cache = new Map<string, ParticipantRefRecord>();
+        for (const record of records) {
+            cache.set(record.id, record);
+        }
+        return ids.map((id) => cache.get(id) ?? null);
     });
 };
 

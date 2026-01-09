@@ -26,11 +26,10 @@ const config: CodegenConfig = {
                 mappers: {
                     User: '@/models/user.model#User',
                     SavedPlayer: '@/models/savedPlayer.model#SavedPlayer',
-                    Game: '@/models/game.model#Game',
                     AnonymousParticipant: '@/models/anonymousParticipant.model#AnonymousParticipant',
+                    Game: '@/models/game.model#Game',
                     Hand: '@/models/hand.model#Hand',
                     HandScore: '@/models/handScore.model#HandScore',
-                    ParticipantScore: '@/models/participantScore.model#ParticipantScore',
                 },
             },
         },

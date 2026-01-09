@@ -2,18 +2,42 @@ import type { DB, GameRecord } from '@/db';
 
 export const gameTable = (db: DB) => {
     return {
-        async createGame(ownerId: string, scoreLimit: number): Promise<GameRecord> {
-            return db.game.create({
-                data: {
-                    ownerId,
-                    scoreLimit,
+        async getGameById(id: string): Promise<GameRecord | null> {
+            return db.game.findUnique({
+                where: { id },
+                include: {
+                    owner: true,
+                    participantRefs: true,
                 },
             });
         },
-        async getGamesForOwnerId(ownerId: string): Promise<GameRecord[]> {
+        async listGamesByIds(ids: string[]): Promise<GameRecord[]> {
+            return db.game.findMany({
+                where: {
+                    id: { in: ids },
+                },
+                include: {
+                    owner: true,
+                    participantRefs: {
+                        orderBy: {
+                            turnOrder: 'asc',
+                        },
+                    },
+                },
+            });
+        },
+        async listGamesForOwnerId(ownerId: string): Promise<GameRecord[]> {
             return db.game.findMany({
                 where: {
                     ownerId,
+                },
+                include: {
+                    owner: true,
+                    participantRefs: {
+                        orderBy: {
+                            turnOrder: 'asc',
+                        },
+                    },
                 },
             });
         },
@@ -22,17 +46,29 @@ export const gameTable = (db: DB) => {
                 where: {
                     ownerId: { in: ownerIds },
                 },
+                include: {
+                    owner: true,
+                    participantRefs: {
+                        orderBy: {
+                            turnOrder: 'asc',
+                        },
+                    },
+                },
             });
         },
-        async getGameById(id: string): Promise<GameRecord | null> {
-            return db.game.findUnique({
-                where: { id },
-            });
-        },
-        async listGamesForIds(ids: string[]): Promise<GameRecord[]> {
-            return db.game.findMany({
-                where: {
-                    id: { in: ids },
+        async createGame(ownerId: string, scoreLimit: number): Promise<GameRecord> {
+            return db.game.create({
+                data: {
+                    ownerId,
+                    scoreLimit,
+                },
+                include: {
+                    owner: true,
+                    participantRefs: {
+                        orderBy: {
+                            turnOrder: 'asc',
+                        },
+                    },
                 },
             });
         },

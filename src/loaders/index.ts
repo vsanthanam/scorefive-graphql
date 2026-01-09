@@ -3,6 +3,7 @@ import gamesForOwnerId from '@/loaders/gamesForOwnerId.loader';
 import handById from '@/loaders/handById.loader';
 import handsForGameId from '@/loaders/handsForGameId.loader';
 import participantRefById from '@/loaders/participantRefById.loader';
+import participantRefByReferenceId from '@/loaders/participantRefByReferenceId.loader';
 import participantRefsForGameId from '@/loaders/participantRefsForGameId.loader';
 import participantRefsForSavedPlayerId from '@/loaders/participantRefsForSavedPlayerId.loaders';
 import participantRefsForUserId from '@/loaders/participantRefsForUserId.loader';
@@ -25,6 +26,7 @@ export type Loaders = {
     participantRefsForSavedPlayerId: DataLoader<string, ParticipantRefRecord[]>;
     handsForGameId: DataLoader<string, HandRecord[]>;
     handById: DataLoader<string, HandRecord | null>;
+    participantRefByReferenceId: DataLoader<{ referenceId: string; gameId: string }, ParticipantRefRecord | null, string>;
 };
 
 export const createLoaders = (db: DB): Loaders => {
@@ -40,5 +42,6 @@ export const createLoaders = (db: DB): Loaders => {
         participantRefsForSavedPlayerId: participantRefsForSavedPlayerId(db),
         handsForGameId: handsForGameId(db),
         handById: handById(db),
+        participantRefByReferenceId: participantRefByReferenceId(db),
     };
 };

@@ -16,7 +16,7 @@ export const gameService = (context: GraphQLContext) => {
             return await this.createGame(input, viewer);
         },
         async createGame(input: CreateGameInput, owner: User): Promise<Game> {
-            if (input.scoreLimit <= 50) {
+            if (input.scoreLimit < 50) {
                 throw new Error('Score limit must be greater than 50');
             }
             if (input.participants.length < 2) {

@@ -3,7 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from '@/__generated__/prisma/client';
 import { databaseURL as connectionString } from '@/utils/env';
 
-import type { User, SavedPlayer, Game, ParticipantRef } from '@/__generated__/prisma/client';
+import type { User, SavedPlayer, Game, ParticipantRef, Hand, Score } from '@/__generated__/prisma/client';
 
 const createPrismaClient = (): PrismaClient => {
     const adapter = new PrismaPg({ connectionString });
@@ -28,6 +28,7 @@ export type UserRecord = User;
 export type SavedPlayerRecord = SavedPlayer;
 export type GameRecord = Game;
 export type ParticipantRefRecord = ParticipantRef;
+export type HandRef = Hand;
 export type HandRecord = Prisma.HandGetPayload<{
     include: {
         scores: {
@@ -37,3 +38,4 @@ export type HandRecord = Prisma.HandGetPayload<{
         };
     };
 }>;
+export type ScoreRecord = Score;

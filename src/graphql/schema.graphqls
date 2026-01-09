@@ -9,6 +9,7 @@ type Query {
 type Mutation {
     createSavedPlayer(displayName: String!): SavedPlayer!
     createGame(input: CreateGameInput!): Game!
+    addHand(input: AddHandInput!): Hand!
 }
 
 input CreateGameInput {
@@ -49,15 +50,23 @@ interface GameParticipant {
     participatingGames: [Game!]!
 }
 
+enum GameStatus {
+    IN_PROGRESS
+    COMPLETED
+}
+
 type Game {
     id: ID!
     scoreLimit: Int!
     owner: User!
     orderedParticipants: [GameParticipant!]!
+    activeParticipants: [GameParticipant!]!
+    winner: GameParticipant
     hands: [Hand!]!
     createdAt: DateTime!
     updatedAt: DateTime!
     participantScores: [ParticipantScore!]!
+    status: GameStatus!
 }
 
 type AnonymousParticipant implements GameParticipant {
@@ -84,4 +93,14 @@ type ParticipantScore {
     game: Game!
     participant: GameParticipant!
     totalPoints: Int!
+}
+
+input AddHandInput {
+    gameId: ID!
+    scores: [HandScoreInput!]!
+}
+
+input HandScoreInput {
+    participantId: ID!
+    points: Int!
 }

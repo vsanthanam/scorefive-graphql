@@ -1,6 +1,10 @@
+import { GameStatus } from '@/__generated__/graphql';
 import { ParticipantRefType } from '@/__generated__/prisma/enums';
 import { savedPlayerService } from '@/services/savedPlayer.service';
 import { userService } from '@/services/user.service';
+
+import { gameStatusService } from './gameStatus.service';
+import { participantScoreService } from './participantScore.service';
 
 import type { ParticipantRefRecord } from '@/db';
 import type { GraphQLContext } from '@/graphql';
@@ -60,6 +64,29 @@ export const gameParticipantService = (context: GraphQLContext) => {
             const records = await context.loaders.participantRefsForGameId.load(game.id);
             const gameParticipants = await Promise.all(records.map((record) => assembleGameParticipant(context, record)));
             return gameParticipants.map(({ gameParticipant }) => gameParticipant);
+        },
+        async activeParticipantsForGame(game: Game): Promise<GameParticipant[]> {
+            const scores = await participantScoreService(context).participantScoresForGame(game);
+            return scores
+                .map((score) => {
+                    const isActive = score.totalPoints < game.scoreLimit;
+                    return { participant: score.participant, isActive };
+                })
+                .filter((participantWithStatus) => participantWithStatus.isActive)
+                .map((participantWithStatus) => participantWithStatus.participant);
+        },
+        async winnerForGame(game: Game): Promise<GameParticipant> {
+            const status = await gameStatusService(context).gameStatusForGame(game);
+            if (status == GameStatus.Completed) {
+                const activeParticipants = await this.activeParticipantsForGame(game);
+                const winner = activeParticipants[0];
+                if (!winner) {
+                    throw new Error(`No active participants found for game with ID ${game.id}`);
+                }
+                return winner;
+            } else {
+                throw new Error(`Game with ID ${game.id} has no winner`);
+            }
         },
     };
 };

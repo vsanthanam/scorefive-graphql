@@ -14,11 +14,11 @@ import { introspection } from '@/utils/env';
 import type { Loaders } from '@/loaders';
 import type { Server } from 'node:http';
 
-export interface GraphQLContext {
+export type GraphQLContext = {
     db: PrismaClient;
     userId: string;
     loaders: Loaders;
-}
+};
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

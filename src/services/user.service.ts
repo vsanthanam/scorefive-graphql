@@ -13,10 +13,10 @@ export const userService = (context: GraphQLContext) => {
             }
             return user;
         },
-        async userById(userId: string): Promise<User | null> {
+        async userById(userId: string): Promise<User> {
             const user = await context.loaders.userById.load(userId);
             if (!user) {
-                return null;
+                throw new Error(`User with ID ${userId} not found`);
             }
             return {
                 __typename: 'User',

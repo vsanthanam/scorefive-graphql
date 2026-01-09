@@ -4,6 +4,22 @@ import type { DB, ParticipantRefRecord } from '@/db';
 
 export const participantRefTable = (db: DB) => {
     return {
+        async getParticipantByReferenceId(referenceId: string, gameId: string): Promise<ParticipantRefRecord | null> {
+            return await db.participantRef.findFirst({
+                where: {
+                    referenceId,
+                    gameId,
+                },
+            });
+        },
+        async listParticipantsByReferenceIds(referenceIds: string[], gameId: string): Promise<ParticipantRefRecord[]> {
+            return await db.participantRef.findMany({
+                where: {
+                    referenceId: { in: referenceIds },
+                    gameId,
+                },
+            });
+        },
         async getParticipantRefById(id: string): Promise<ParticipantRefRecord | null> {
             return await db.participantRef.findUnique({
                 where: { id },

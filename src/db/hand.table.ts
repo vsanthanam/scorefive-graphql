@@ -62,5 +62,20 @@ export const handTable = (db: DB) => {
                 },
             });
         },
+        createHand: async (gameId: string, handNumber: number): Promise<HandRecord> => {
+            return db.hand.create({
+                data: {
+                    gameId,
+                    handNumber,
+                },
+                include: {
+                    scores: {
+                        include: {
+                            participantRef: true,
+                        },
+                    },
+                },
+            });
+        },
     };
 };

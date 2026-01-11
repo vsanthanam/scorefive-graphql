@@ -8,19 +8,8 @@ type Query {
 
 type Mutation {
     createSavedPlayer(displayName: String!): SavedPlayer!
+    updateSavedPlayerDisplayName(savedPlayerId: ID!, newDisplayName: String!): SavedPlayer!
     createGame(input: CreateGameInput!): Game!
-    addHand(input: AddHandInput!): Hand!
-}
-
-input CreateGameInput {
-    scoreLimit: Int!
-    participants: [ParticipantInput!]!
-}
-
-input ParticipantInput @oneOf {
-    userId: ID
-    savedPlayerId: ID
-    anonymousDisplayName: String
 }
 
 type User implements GameParticipant {
@@ -38,9 +27,9 @@ scalar DateTime
 type SavedPlayer implements GameParticipant {
     id: ID!
     displayName: String!
-    owner: User!
     createdAt: DateTime!
     updatedAt: DateTime!
+    owner: User!
     participatingGames: [Game!]!
 }
 
@@ -50,57 +39,42 @@ interface GameParticipant {
     participatingGames: [Game!]!
 }
 
-enum GameStatus {
-    IN_PROGRESS
-    COMPLETED
-}
-
-type Game {
-    id: ID!
-    scoreLimit: Int!
-    owner: User!
-    orderedParticipants: [GameParticipant!]!
-    activeParticipants: [GameParticipant!]!
-    winner: GameParticipant
-    hands: [Hand!]!
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    participantScores: [ParticipantScore!]!
-    status: GameStatus!
-}
-
 type AnonymousParticipant implements GameParticipant {
     id: ID!
     displayName: String!
     participatingGames: [Game!]!
 }
 
+type Game {
+    id: ID!
+    owner: User!
+    orderedParticipants: [GameParticipant!]!
+    scoreLimit: Int
+    hands: [Hand!]!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+input CreateGameInput {
+    scoreLimit: Int!
+    gameParticipants: [GameParticipantInput!]!
+}
+
+input GameParticipantInput @oneOf {
+    userId: String
+    savedPlayerId: String
+    anonymousParticipantDisplayName: String
+}
+
 type Hand {
     id: ID!
+    game: Game!
     handNumber: Int!
     scores: [HandScore!]!
-    game: Game!
 }
 
 type HandScore {
-    id: ID!
-    points: Int!
-    participant: GameParticipant!
     hand: Hand!
-}
-
-type ParticipantScore {
-    game: Game!
     participant: GameParticipant!
-    totalPoints: Int!
-}
-
-input AddHandInput {
-    gameId: ID!
-    scores: [HandScoreInput!]!
-}
-
-input HandScoreInput {
-    participantId: ID!
     points: Int!
 }

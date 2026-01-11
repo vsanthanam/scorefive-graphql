@@ -7,18 +7,19 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
 
 import { PrismaClient } from '@/__generated__/prisma/client';
-// import { plugin as pinoPlugin } from '@/graphql/plugins/logging';
 import resolvers from '@/graphql/resolvers';
 import { introspection } from '@/utils/env';
 
 import type { Loaders } from '@/loaders';
+import type { Services } from '@/services';
 import type { Server } from 'node:http';
 
-export type GraphQLContext = {
+export interface GraphQLContext {
     db: PrismaClient;
     userId: string;
     loaders: Loaders;
-};
+    services: Services;
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

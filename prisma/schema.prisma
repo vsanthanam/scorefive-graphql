@@ -10,83 +10,84 @@ datasource db {
 }
 
 model User {
-  id            String        @id @unique @db.Text
-  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime      @updatedAt @db.Timestamptz(6)
-  displayName   String        @db.Text
-  emailAddress  String?       @db.Text
-  emailVerified Boolean       @default(false)
-  savedPlayers  SavedPlayer[]
-  games         Game[]
+  id              String           @id @unique @db.Text
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
+  displayName     String           @db.Text
+  emailAddress    String?          @db.Text
+  emailVerified   Boolean          @default(false)
+  savedPlayers    SavedPlayer[]
+  games           Game[]
+  participantRefs ParticipantRef[]
 }
 
 model SavedPlayer {
-  id          String   @id @default(uuid()) @db.Uuid
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
-  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId     String   @db.Text
-  displayName String   @db.Text
+  id              String           @id @default(uuid()) @db.Uuid
+  displayName     String           @db.Text
+  owner           User             @relation(fields: [ownerId], references: [id])
+  ownerId         String           @db.Text
+  participantRefs ParticipantRef[]
 }
 
 model Game {
-  id              String           @id @default(uuid()) @db.Uuid
-  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
-  owner           User             @relation(fields: [ownerId], references: [id])
-  ownerId         String           @db.Text
-  scoreLimit      Int
-  participantRefs ParticipantRef[]
-  hands           Hand[]
-
-  @@index([ownerId])
+  id                    String                 @id @default(uuid()) @db.Uuid
+  createdAt             DateTime               @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime               @updatedAt @db.Timestamptz(6)
+  owner                 User                   @relation(fields: [ownerId], references: [id])
+  ownerId               String                 @db.Text
+  participantRefs       ParticipantRef[]
+  anonymousParticipants AnonymousParticipant[]
+  scoreLimit            Int
+  hands                 Hand[]
 }
 
 model ParticipantRef {
-  id                   String             @id @default(uuid()) @db.Uuid
-  referenceId          String?            @db.Text
-  participantType      ParticipantRefType
-  anonymousDisplayName String?            @db.Text
-  game                 Game               @relation(fields: [gameId], references: [id])
-  gameId               String             @db.Uuid
-  turnOrder            Int
-  scores               Score[]
+  id                     String                @id @default(uuid()) @db.Uuid
+  game                   Game                  @relation(fields: [gameId], references: [id])
+  gameId                 String                @db.Uuid
+  user                   User?                 @relation(fields: [userId], references: [id])
+  userId                 String?               @db.Text
+  savedPlayer            SavedPlayer?          @relation(fields: [savedPlayerId], references: [id])
+  savedPlayerId          String?               @db.Uuid
+  anonymousParticipant   AnonymousParticipant? @relation(fields: [anonymousParticipantId], references: [id])
+  anonymousParticipantId String?               @unique @db.Uuid
+  turnOrder              Int
+  scores                 Score[]
 
   @@unique([id, gameId])
-  @@unique([gameId, participantType, referenceId])
   @@unique([gameId, turnOrder])
-  @@index([gameId])
+  @@unique([gameId, userId])
+  @@unique([gameId, savedPlayerId])
+  @@unique([gameId, anonymousParticipantId])
 }
 
-enum ParticipantRefType {
-  USER
-  SAVED_PLAYER
-  ANONYMOUS
+model AnonymousParticipant {
+  id             String          @id @default(uuid()) @db.Uuid
+  displayName    String          @db.Text
+  game           Game            @relation(fields: [gameId], references: [id])
+  gameId         String          @db.Uuid
+  participantRef ParticipantRef?
 }
 
 model Hand {
-  id         String   @id @default(uuid()) @db.Uuid
-  createdAt  DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime @updatedAt @db.Timestamptz(6)
+  id         String  @id @default(uuid()) @db.Uuid
+  game       Game    @relation(fields: [gameId], references: [id])
+  gameId     String  @db.Uuid
   handNumber Int
-  game       Game     @relation(fields: [gameId], references: [id])
-  gameId     String   @db.Uuid
   scores     Score[]
 
-  @@unique([handNumber, gameId])
   @@unique([id, gameId])
-  @@index([gameId])
+  @@unique([gameId, handNumber])
 }
 
 model Score {
   id               String         @id @default(uuid()) @db.Uuid
-  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
-  updatedAt        DateTime       @updatedAt @db.Timestamptz(6)
-  points           Int
-  participantRef   ParticipantRef @relation(fields: [participantRefId], references: [id])
-  participantRefId String         @db.Uuid
-  hand             Hand           @relation(fields: [handId], references: [id])
+  hand             Hand           @relation(fields: [handId, gameId], references: [id, gameId])
   handId           String         @db.Uuid
+  participantRef   ParticipantRef @relation(fields: [participantRefId, gameId], references: [id, gameId])
+  participantRefId String         @db.Uuid
+  gameId           String         @db.Uuid
+  points           Int
 
-  @@unique([participantRefId, handId])
+  @@unique([handId, participantRefId])
 }

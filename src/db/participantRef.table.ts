@@ -1,117 +1,73 @@
-import { ParticipantRefType } from '@/__generated__/prisma/enums';
-
 import type { DB, ParticipantRefRecord } from '@/db';
 
 export const participantRefTable = (db: DB) => {
     return {
-        async getParticipantByReferenceId(referenceId: string, gameId: string): Promise<ParticipantRefRecord | null> {
-            return await db.participantRef.findFirst({
-                where: {
-                    referenceId,
-                    gameId,
-                },
-            });
-        },
-        async listParticipantsByReferenceIds(referenceIds: string[], gameId: string): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    referenceId: { in: referenceIds },
-                    gameId,
-                },
-            });
-        },
         async getParticipantRefById(id: string): Promise<ParticipantRefRecord | null> {
-            return await db.participantRef.findUnique({
+            return db.participantRef.findUnique({
                 where: { id },
+                include: {
+                    game: true,
+                    savedPlayer: true,
+                    user: true,
+                    anonymousParticipant: true,
+                },
             });
         },
-        async listParticipantRefsForIds(ids: string[]): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
+        async listParticipantRefsByIds(ids: string[]): Promise<ParticipantRefRecord[]> {
+            return db.participantRef.findMany({
                 where: {
                     id: { in: ids },
                 },
-            });
-        },
-        async listParticipantRefsForGameId(gameId: string): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    gameId,
-                },
-                orderBy: {
-                    turnOrder: 'asc',
+                include: {
+                    game: true,
+                    savedPlayer: true,
+                    user: true,
+                    anonymousParticipant: true,
                 },
             });
         },
-        async listParticipantRefsForGameIds(gameIds: string[]): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    gameId: { in: gameIds },
-                },
-                orderBy: {
-                    turnOrder: 'asc',
-                },
-            });
-        },
-        async createUserParticipantRef(userId: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {
-            return await db.participantRef.create({
+        async createUserParticipantRef(gameId: string, userId: string, turnOrder: number): Promise<ParticipantRefRecord> {
+            return db.participantRef.create({
                 data: {
-                    referenceId: userId,
-                    participantType: ParticipantRefType.USER,
                     gameId,
+                    userId,
                     turnOrder,
                 },
+                include: {
+                    game: true,
+                    savedPlayer: true,
+                    user: true,
+                    anonymousParticipant: true,
+                },
             });
         },
-        async createSavedPlayerParticipantRef(savedPlayerId: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {
-            return await db.participantRef.create({
+        async createSavedPlayerParticipantRef(gameId: string, savedPlayerId: string, turnOrder: number): Promise<ParticipantRefRecord> {
+            return db.participantRef.create({
                 data: {
-                    referenceId: savedPlayerId,
-                    participantType: ParticipantRefType.SAVED_PLAYER,
                     gameId,
+                    savedPlayerId,
                     turnOrder,
                 },
+                include: {
+                    game: true,
+                    savedPlayer: true,
+                    user: true,
+                    anonymousParticipant: true,
+                },
             });
         },
-        async createAnonymousParticipantRef(anonymousDisplayName: string, gameId: string, turnOrder: number): Promise<ParticipantRefRecord> {
-            return await db.participantRef.create({
+        async createAnonymousParticipantRef(gameId: string, anonymousParticipantId: string, turnOrder: number): Promise<ParticipantRefRecord> {
+            return db.participantRef.create({
                 data: {
-                    referenceId: null,
-                    participantType: ParticipantRefType.ANONYMOUS,
-                    anonymousDisplayName,
                     gameId,
+                    anonymousParticipantId,
                     turnOrder,
                 },
-            });
-        },
-        async listParticipantRefsForUserId(userId: string): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    participantType: ParticipantRefType.USER,
-                    referenceId: userId,
-                },
-            });
-        },
-        async listParticipantRefsForUserIds(userIds: string[]): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    participantType: ParticipantRefType.USER,
-                    referenceId: { in: userIds },
-                },
-            });
-        },
-        async listParticipantRefsForSavedPlayerId(savedPlayerId: string): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    participantType: ParticipantRefType.SAVED_PLAYER,
-                    referenceId: savedPlayerId,
-                },
-            });
-        },
-        async listParticipantRefsForSavedPlayerIds(savedPlayerIds: string[]): Promise<ParticipantRefRecord[]> {
-            return await db.participantRef.findMany({
-                where: {
-                    participantType: ParticipantRefType.SAVED_PLAYER,
-                    referenceId: { in: savedPlayerIds },
+                include: {
+                    game: true,
+                    savedPlayer: true,
+                    user: true,
+                    anonymousParticipant: true,
                 },
             });
         },

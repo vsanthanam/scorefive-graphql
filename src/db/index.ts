@@ -1,9 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 
-import { Prisma, PrismaClient } from '@/__generated__/prisma/client';
+import { PrismaClient, Prisma } from '@/__generated__/prisma/client';
 import { databaseURL as connectionString } from '@/utils/env';
-
-import type { User, SavedPlayer, Game, ParticipantRef, Hand, Score } from '@/__generated__/prisma/client';
 
 const createPrismaClient = (): PrismaClient => {
     const adapter = new PrismaPg({ connectionString });
@@ -23,19 +21,65 @@ export const getPrismaClient = (): PrismaClient => {
     return prismaClient;
 };
 
-export type DB = PrismaClient | Prisma.TransactionClient;
-export type UserRecord = User;
-export type SavedPlayerRecord = SavedPlayer;
-export type GameRecord = Game;
-export type ParticipantRefRecord = ParticipantRef;
-export type HandRef = Hand;
-export type HandRecord = Prisma.HandGetPayload<{
+export type SavedPlayerRecord = Prisma.SavedPlayerGetPayload<{
     include: {
-        scores: {
+        owner: true;
+        participantRefs: {
             include: {
-                participantRef: true;
+                game: true;
             };
         };
     };
 }>;
-export type ScoreRecord = Score;
+
+export type UserRecord = Prisma.UserGetPayload<{
+    include: {
+        participantRefs: {
+            include: {
+                game: true;
+            };
+        };
+    };
+}>;
+
+export type AnonymousParticipantRecord = Prisma.AnonymousParticipantGetPayload<{
+    include: {
+        participantRef: true;
+    };
+}>;
+
+export type ParticipantRefRecord = Prisma.ParticipantRefGetPayload<{
+    include: {
+        game: true;
+        savedPlayer: true;
+        user: true;
+        anonymousParticipant: true;
+    };
+}>;
+
+export type GameRecord = Prisma.GameGetPayload<{
+    include: {
+        owner: true;
+        participantRefs: true;
+    };
+}>;
+
+export type HandRecord = Prisma.HandGetPayload<{
+    include: {
+        game: true;
+        scores: {
+            include: {
+                participantRef: {
+                    include: {
+                        game: true;
+                        savedPlayer: true;
+                        user: true;
+                        anonymousParticipant: true;
+                    };
+                };
+            };
+        };
+    };
+}>;
+
+export type DB = PrismaClient | Prisma.TransactionClient;

@@ -6,9 +6,17 @@ export const handTable = (db: DB) => {
             return db.hand.findUnique({
                 where: { id },
                 include: {
+                    game: true,
                     scores: {
                         include: {
-                            participantRef: true,
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
                         },
                     },
                 },
@@ -20,11 +28,22 @@ export const handTable = (db: DB) => {
                     id: { in: ids },
                 },
                 include: {
+                    game: true,
                     scores: {
                         include: {
-                            participantRef: true,
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
                         },
                     },
+                },
+                orderBy: {
+                    handNumber: 'asc',
                 },
             });
         },
@@ -34,9 +53,17 @@ export const handTable = (db: DB) => {
                     gameId,
                 },
                 include: {
+                    game: true,
                     scores: {
                         include: {
-                            participantRef: true,
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
                         },
                     },
                 },
@@ -51,29 +78,22 @@ export const handTable = (db: DB) => {
                     gameId: { in: gameIds },
                 },
                 include: {
+                    game: true,
                     scores: {
                         include: {
-                            participantRef: true,
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
                         },
                     },
                 },
                 orderBy: {
                     handNumber: 'asc',
-                },
-            });
-        },
-        createHand: async (gameId: string, handNumber: number): Promise<HandRecord> => {
-            return db.hand.create({
-                data: {
-                    gameId,
-                    handNumber,
-                },
-                include: {
-                    scores: {
-                        include: {
-                            participantRef: true,
-                        },
-                    },
                 },
             });
         },

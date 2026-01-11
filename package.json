@@ -42,7 +42,7 @@
         "format:check": "prettier . --check",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "check": "bun format:check && bun lint",
+        "check": "bun compile && bun format:check && bun lint",
         "fix": "bun format && bun lint:fix"
     },
     "type": "module",

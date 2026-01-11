@@ -3,7 +3,8 @@ import { expressMiddleware } from '@as-integrations/express5';
 
 import { getPrismaClient } from '@/db';
 import { createLoaders } from '@/loaders';
-import { auth0Service } from '@/services/auth0.service';
+import { createServices } from '@/services';
+import { Auth0Service } from '@/services/auth0.service';
 
 import type { GraphQLContext } from '@/graphql';
 
@@ -17,18 +18,23 @@ const graphqlMiddleware = (server: ApolloServer<GraphQLContext>) => {
             const payload = auth.payload ?? null;
             const token = auth.token ?? null;
             const db = getPrismaClient();
+            const auth0 = new Auth0Service(db);
             const loaders = createLoaders(db);
+            let context: GraphQLContext;
+            const services = createServices(() => context);
             if (payload != null && token != null) {
                 const sub = payload.sub;
                 if (typeof sub !== 'string') {
                     throw new Error('Unknown Authorization Failure');
                 }
-                const existing = await auth0Service(db).lookupUserFromAuth0(payload);
+                const existing = await auth0.lookupUserFromAuth0(payload);
                 if (existing) {
-                    return { userId: existing.id, db, loaders };
+                    context = { userId: existing.id, db, loaders, services };
+                    return context;
                 }
-                const user = await auth0Service(db).createOrUpdateUserFromAuth0(payload, token);
-                return { userId: user.id, db, loaders };
+                const user = await auth0.createOrUpdateUserFromAuth0(payload, token);
+                context = { userId: user.id, db, loaders, services };
+                return context;
             } else {
                 throw new Error('Unauthorized');
             }

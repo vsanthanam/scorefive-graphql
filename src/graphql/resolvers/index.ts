@@ -1,4 +1,5 @@
 import anonymousParticipant from '@/graphql/resolvers/anonymousParticipant.resolver';
+import game from '@/graphql/resolvers/game.resolver';
 import hand from '@/graphql/resolvers/hand.resolver';
 import handScore from '@/graphql/resolvers/handScore.resolver';
 import mutation from '@/graphql/resolvers/mutation.resolver';
@@ -14,6 +15,7 @@ const resolvers: Resolvers = {
     Query: query,
     Mutation: mutation,
     User: user,
+    Game: game,
     SavedPlayer: savedPlayer,
     AnonymousParticipant: anonymousParticipant,
     Hand: hand,

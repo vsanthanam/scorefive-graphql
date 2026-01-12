@@ -10,6 +10,7 @@ type Mutation {
     createSavedPlayer(displayName: String!): SavedPlayer!
     updateSavedPlayerDisplayName(savedPlayerId: ID!, newDisplayName: String!): SavedPlayer!
     createGame(input: CreateGameInput!): Game!
+    addHand(input: AddHandInput!): Hand!
 }
 
 type User implements GameParticipant {
@@ -45,12 +46,21 @@ type AnonymousParticipant implements GameParticipant {
     participatingGames: [Game!]!
 }
 
+enum GameStatus {
+    IN_PROGRESS
+    COMPLETED
+}
+
 type Game {
     id: ID!
     owner: User!
-    orderedParticipants: [GameParticipant!]!
     scoreLimit: Int
+    status: GameStatus!
+    orderedParticipants: [GameParticipant!]!
+    activeParticipants: [GameParticipant!]!
+    winner: GameParticipant
     hands: [Hand!]!
+    participantScores: [ParticipantScore!]!
     createdAt: DateTime!
     updatedAt: DateTime!
 }
@@ -76,5 +86,21 @@ type Hand {
 type HandScore {
     hand: Hand!
     participant: GameParticipant!
+    points: Int!
+}
+
+type ParticipantScore {
+    game: Game!
+    participant: GameParticipant!
+    totalPoints: Int!
+}
+
+input AddHandInput {
+    gameId: ID!
+    scores: [HandScoreInput!]!
+}
+
+input HandScoreInput {
+    participantId: ID!
     points: Int!
 }

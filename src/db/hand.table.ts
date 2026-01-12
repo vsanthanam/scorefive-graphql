@@ -3,7 +3,7 @@ import type { DB, HandRecord } from '@/db';
 export const handTable = (db: DB) => {
     return {
         async getHandById(id: string): Promise<HandRecord | null> {
-            return db.hand.findUnique({
+            return await db.hand.findUnique({
                 where: { id },
                 include: {
                     game: true,
@@ -23,7 +23,7 @@ export const handTable = (db: DB) => {
             });
         },
         async listHandsForIds(ids: string[]): Promise<HandRecord[]> {
-            return db.hand.findMany({
+            return await db.hand.findMany({
                 where: {
                     id: { in: ids },
                 },
@@ -48,7 +48,7 @@ export const handTable = (db: DB) => {
             });
         },
         async listHandsForGameId(gameId: string): Promise<HandRecord[]> {
-            return db.hand.findMany({
+            return await db.hand.findMany({
                 where: {
                     gameId,
                 },
@@ -73,7 +73,7 @@ export const handTable = (db: DB) => {
             });
         },
         async listHandsForGameIds(gameIds: string[]): Promise<HandRecord[]> {
-            return db.hand.findMany({
+            return await db.hand.findMany({
                 where: {
                     gameId: { in: gameIds },
                 },
@@ -94,6 +94,29 @@ export const handTable = (db: DB) => {
                 },
                 orderBy: {
                     handNumber: 'asc',
+                },
+            });
+        },
+        async createHand(gameId: string, handNumber: number): Promise<HandRecord> {
+            return await db.hand.create({
+                data: {
+                    gameId,
+                    handNumber,
+                },
+                include: {
+                    game: true,
+                    scores: {
+                        include: {
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
+                        },
+                    },
                 },
             });
         },

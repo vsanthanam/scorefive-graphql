@@ -1,11 +1,12 @@
 import { anonymousParticipantTable } from '@/db/anonymousParticipant.table';
 import { gameTable } from '@/db/game.table';
 import { participantRefTable } from '@/db/participantRef.table';
-import { type Game, buildGame } from '@/models/game.model';
 
 import type { CreateGameInput } from '@/__generated__/graphql';
+import type { GameRecord } from '@/db';
 import type { GraphQLContext } from '@/graphql';
 import type { AnonymousParticipant } from '@/models/anonymousParticipant.model';
+import type { Game } from '@/models/game.model';
 import type { SavedPlayer } from '@/models/savedPlayer.model';
 import type { User } from '@/models/user.model';
 
@@ -15,11 +16,11 @@ export class GameService {
     }
 
     async gameById(id: string): Promise<Game> {
-        const game = await this.context.loaders.gameById.load(id);
-        if (!game) {
+        const record = await this.context.loaders.gameById.load(id);
+        if (!record) {
             throw new Error(`Game with ID ${id} not found`);
         }
-        return buildGame(game, this.context);
+        return this.buildGame(record);
     }
 
     async gamesForViewer(): Promise<Game[]> {
@@ -29,7 +30,7 @@ export class GameService {
 
     async gamesForOwner(owner: User): Promise<Game[]> {
         const games = await this.context.loaders.gamesForOwnerId.load(owner.id);
-        return await Promise.all(games.map((g) => buildGame(g, this.context)));
+        return await Promise.all(games.map((record) => this.buildGame(record)));
     }
 
     async createGameForViewer(input: CreateGameInput): Promise<Game> {
@@ -90,6 +91,28 @@ export class GameService {
 
     async participatingGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game> {
         return await this.gameById(anonymousParticipant.participationMetadata.gameId);
+    }
+
+    async buildGame(record: GameRecord): Promise<Game> {
+        const orderedParticipants = await Promise.all(
+            record.participantRefs.map(async (ref) => {
+                const refRecord = await this.context.loaders.participantRefById.load(ref.id);
+                if (!refRecord) {
+                    throw new Error(`ParticipantRef with ID ${ref.id} not found`);
+                }
+                return await this.context.services.gameParticipant.buildGameParticipant(refRecord);
+            }),
+        );
+        const owner = await this.context.services.user.userById(record.owner.id);
+        return {
+            __typename: 'Game',
+            createdAt: record.createdAt,
+            updatedAt: record.updatedAt,
+            scoreLimit: record.scoreLimit,
+            orderedParticipants,
+            owner,
+            id: record.id,
+        };
     }
 
     private readonly context: GraphQLContext;

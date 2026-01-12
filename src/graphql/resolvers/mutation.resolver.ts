@@ -24,6 +24,13 @@ const mutation: MutationResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async addHand(_parent, args, context) {
+        try {
+            return await context.services.hand.createHand(args.input);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default mutation;

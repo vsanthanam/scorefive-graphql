@@ -30,6 +30,7 @@ const config: CodegenConfig = {
                     Game: '@/models/game.model#Game',
                     Hand: '@/models/hand.model#Hand',
                     HandScore: '@/models/handScore.model#HandScore',
+                    ParticipantScore: '@/models/partcipantScore.model#ParticipantScore',
                 },
             },
         },

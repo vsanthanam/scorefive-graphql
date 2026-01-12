@@ -1,8 +1,10 @@
 import { userTable } from '@/db/user.table';
-import { buildUser, type User } from '@/models/user.model';
 import { issuerBaseURL } from '@/utils/env';
 
+import { UserService } from './user.service';
+
 import type { DB } from '@/db';
+import type { User } from '@/models/user.model';
 import type { JWTPayload } from 'jose';
 
 export class Auth0Service {
@@ -21,7 +23,7 @@ export class Auth0Service {
         if (!user) {
             return null;
         }
-        return buildUser(user);
+        return UserService.buildUser(user);
     }
 
     async createOrUpdateUserFromAuth0(payload: JWTPayload, accessToken: string | null): Promise<User> {
@@ -46,7 +48,7 @@ export class Auth0Service {
             }
         }
         const user = await userTable(this.db).createOrUpdateUser(sub, nickname ?? undefined, email ?? undefined, emailVerified ?? undefined);
-        return buildUser(user);
+        return UserService.buildUser(user);
     }
 
     private getString = (payload: JWTPayload, key: string): string | null => {

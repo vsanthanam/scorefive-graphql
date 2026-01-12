@@ -1,3 +1,5 @@
+import { GraphQLError } from 'graphql';
+
 import type { HandResolvers } from '@/__generated__/graphql';
 
 const hand: HandResolvers = {
@@ -5,8 +7,7 @@ const hand: HandResolvers = {
         try {
             return await context.services.game.gameById(parent.gameId);
         } catch (error) {
-            console.error('Error fetching game for hand:', error);
-            throw error;
+            throw new GraphQLError((error as Error).message);
         }
     },
 };

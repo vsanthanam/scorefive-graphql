@@ -11,6 +11,7 @@ type Mutation {
     updateSavedPlayerDisplayName(savedPlayerId: ID!, newDisplayName: String!): SavedPlayer!
     createGame(input: CreateGameInput!): Game!
     addHand(input: AddHandInput!): Hand!
+    deleteGame(id: ID!): Boolean!
 }
 
 type User implements GameParticipant {

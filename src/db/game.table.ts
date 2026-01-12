@@ -72,5 +72,10 @@ export const gameTable = (db: DB) => {
                 },
             });
         },
+        async deleteGame(id: string): Promise<void> {
+            await db.game.delete({
+                where: { id },
+            });
+        },
     };
 };

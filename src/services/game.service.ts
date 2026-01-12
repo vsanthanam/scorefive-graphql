@@ -93,6 +93,15 @@ export class GameService {
         return await this.gameById(anonymousParticipant.participationMetadata.gameId);
     }
 
+    async deleteGame(id: string): Promise<boolean> {
+        try {
+            await gameTable(this.context.db).deleteGame(id);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
     async buildGame(record: GameRecord): Promise<Game> {
         const orderedParticipants = await Promise.all(
             record.participantRefs.map(async (ref) => {

@@ -16,13 +16,13 @@ const graphqlMiddleware = (server: ApolloServer<GraphQLContext>) => {
                 throw new Error('Unauthorized');
             }
             const payload = auth.payload ?? null;
-            const token = auth.token ?? null;
+            const accessToken = auth.token ?? null;
             const db = getPrismaClient();
             const auth0 = new Auth0Service(db);
             const loaders = createLoaders(db);
             let context: GraphQLContext;
             const services = createServices(() => context);
-            if (payload != null && token != null) {
+            if (payload != null && accessToken != null) {
                 const sub = payload.sub;
                 if (typeof sub !== 'string') {
                     throw new Error('Unknown Authorization Failure');
@@ -32,7 +32,7 @@ const graphqlMiddleware = (server: ApolloServer<GraphQLContext>) => {
                     context = { userId: existing.id, db, loaders, services };
                     return context;
                 }
-                const user = await auth0.createOrUpdateUserFromAuth0(payload, token);
+                const user = await auth0.createOrUpdateUserFromAuth0({ payload, accessToken });
                 context = { userId: user.id, db, loaders, services };
                 return context;
             } else {

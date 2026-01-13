@@ -28,19 +28,19 @@ export const userTable = (db: DB) => {
                 },
             });
         },
-        async createOrUpdateUser(id: string, displayName?: string, emailAddress?: string, emailVerified?: boolean): Promise<UserRecord> {
+        async createOrUpdateUser(data: { id: string; displayName?: string; emailAddress?: string; emailVerified?: boolean }): Promise<UserRecord> {
             return await db.user.upsert({
-                where: { id },
+                where: { id: data.id },
                 create: {
-                    id,
-                    displayName: displayName ?? 'DefaultName',
-                    emailAddress,
-                    emailVerified,
+                    id: data.id,
+                    displayName: data.displayName ?? 'DefaultName',
+                    emailAddress: data.emailAddress,
+                    emailVerified: data.emailVerified,
                 },
                 update: {
-                    displayName,
-                    emailAddress,
-                    emailVerified,
+                    displayName: data.displayName,
+                    emailAddress: data.emailAddress,
+                    emailVerified: data.emailVerified,
                 },
                 include: {
                     participantRefs: {

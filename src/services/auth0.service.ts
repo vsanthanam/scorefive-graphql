@@ -26,19 +26,19 @@ export class Auth0Service {
         return UserService.buildUser(user);
     }
 
-    async createOrUpdateUserFromAuth0(payload: JWTPayload, accessToken: string | null): Promise<User> {
-        const sub = this.getString(payload, 'sub');
+    async createOrUpdateUserFromAuth0(data: { payload: JWTPayload; accessToken: string | null }): Promise<User> {
+        const sub = this.getString(data.payload, 'sub');
         if (!sub) {
             throw new Error('Auth0 token missing sub');
         }
 
-        let email = this.getString(payload, 'email');
-        let emailVerified = this.getBool(payload, 'email_verified');
-        let nickname = this.getString(payload, 'nickname');
+        let email = this.getString(data.payload, 'email');
+        let emailVerified = this.getBool(data.payload, 'email_verified');
+        let nickname = this.getString(data.payload, 'nickname');
 
-        if (!email && accessToken) {
+        if (!email && data.accessToken) {
             const res = await fetch(`${issuerBaseURL}userinfo`, {
-                headers: { Authorization: `Bearer ${accessToken}` },
+                headers: { Authorization: `Bearer ${data.accessToken}` },
             });
             if (res.ok) {
                 const info = (await res.json()) as Record<string, unknown>;
@@ -47,7 +47,12 @@ export class Auth0Service {
                 nickname = typeof info.nickname === 'string' ? info.nickname : nickname;
             }
         }
-        const user = await userTable(this.db).createOrUpdateUser(sub, nickname ?? undefined, email ?? undefined, emailVerified ?? undefined);
+        const user = await userTable(this.db).createOrUpdateUser({
+            id: sub,
+            displayName: nickname ?? undefined,
+            emailAddress: email ?? undefined,
+            emailVerified: emailVerified ?? undefined,
+        });
         return UserService.buildUser(user);
     }
 

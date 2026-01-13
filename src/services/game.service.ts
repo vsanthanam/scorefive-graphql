@@ -35,35 +35,43 @@ export class GameService {
 
     async createGameForViewer(input: CreateGameInput): Promise<Game> {
         const user = await this.context.services.user.viewer();
-        return this.createGameForOwner(user, input);
+        return this.createGameForOwner({ owner: user, input });
     }
 
-    async createGameForOwner(owner: User, input: CreateGameInput): Promise<Game> {
-        if (input.gameParticipants.length < 2) {
+    async createGameForOwner(data: { owner: User; input: CreateGameInput }): Promise<Game> {
+        if (data.input.gameParticipants.length < 2) {
             throw new Error('A game must have at least two participants');
         }
-        if (input.scoreLimit < 50) {
+        if (data.input.scoreLimit < 50) {
             throw new Error('Score limit must at least 50');
         }
         const id = await this.context.db.$transaction(async (tx) => {
-            const newGame = await gameTable(tx).createGame(owner.id, input.scoreLimit);
-            for (let i = 0; i < input.gameParticipants.length; i++) {
-                const participantInput = input.gameParticipants[i];
+            const newGame = await gameTable(tx).createGame({ ownerId: data.owner.id, scoreLimit: data.input.scoreLimit });
+            for (let i = 0; i < data.input.gameParticipants.length; i++) {
+                const participantInput = data.input.gameParticipants[i];
                 if (!participantInput) {
                     throw new Error('Invalid participant input');
                 }
                 if (participantInput.userId) {
                     await this.context.services.user.userById(participantInput.userId);
-                    await participantRefTable(tx).createUserParticipantRef(newGame.id, participantInput.userId, i);
+                    await participantRefTable(tx).createUserParticipantRef({ gameId: newGame.id, userId: participantInput.userId, turnOrder: i });
                 } else if (participantInput.savedPlayerId) {
                     await this.context.services.savedPlayer.savedPlayerById(participantInput.savedPlayerId);
-                    await participantRefTable(tx).createSavedPlayerParticipantRef(newGame.id, participantInput.savedPlayerId, i);
+                    await participantRefTable(tx).createSavedPlayerParticipantRef({
+                        gameId: newGame.id,
+                        savedPlayerId: participantInput.savedPlayerId,
+                        turnOrder: i,
+                    });
                 } else if (participantInput.anonymousParticipantDisplayName) {
                     const anonymousParticipant = await anonymousParticipantTable(tx).createAnonymousParticipant({
                         gameId: newGame.id,
                         displayName: participantInput.anonymousParticipantDisplayName,
                     });
-                    await participantRefTable(tx).createAnonymousParticipantRef(newGame.id, anonymousParticipant.id, i);
+                    await participantRefTable(tx).createAnonymousParticipantRef({
+                        gameId: newGame.id,
+                        anonymousParticipantId: anonymousParticipant.id,
+                        turnOrder: i,
+                    });
                 } else {
                     throw new Error('Unknown participant type in input');
                 }

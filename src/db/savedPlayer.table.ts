@@ -60,11 +60,11 @@ export const savedPlayerTable = (db: DB) => {
                 },
             });
         },
-        async createSavedPlayer(ownerId: string, displayName: string): Promise<SavedPlayerRecord> {
+        async createSavedPlayer(data: { ownerId: string; displayName: string }): Promise<SavedPlayerRecord> {
             return await db.savedPlayer.create({
                 data: {
-                    ownerId,
-                    displayName,
+                    ownerId: data.ownerId,
+                    displayName: data.displayName,
                 },
                 include: {
                     owner: true,
@@ -76,11 +76,11 @@ export const savedPlayerTable = (db: DB) => {
                 },
             });
         },
-        async updateSavedPlayerDisplayName(id: string, newDisplayName: string): Promise<SavedPlayerRecord> {
+        async updateSavedPlayerDisplayName(data: { id: string; newDisplayName: string }): Promise<SavedPlayerRecord> {
             return await db.savedPlayer.update({
-                where: { id },
+                where: { id: data.id },
                 data: {
-                    displayName: newDisplayName,
+                    displayName: data.newDisplayName,
                 },
                 include: {
                     owner: true,

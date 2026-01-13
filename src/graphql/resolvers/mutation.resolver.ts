@@ -12,7 +12,7 @@ const mutation: MutationResolvers = {
     },
     async updateSavedPlayerDisplayName(_parent, args, context) {
         try {
-            return await context.services.savedPlayer.updateSavedPlayerDisplayName(args.savedPlayerId, args.newDisplayName);
+            return await context.services.savedPlayer.updateSavedPlayerDisplayName({ id: args.savedPlayerId, newDisplayName: args.newDisplayName });
         } catch (error) {
             throw new GraphQLError((error as Error).message);
         }

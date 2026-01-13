@@ -71,5 +71,20 @@ export const participantRefTable = (db: DB) => {
                 },
             });
         },
+        async convertSavedPlayerToAnonymousParticipant(participantRefId: string, anonymousParticipantId: string): Promise<ParticipantRefRecord> {
+            return db.participantRef.update({
+                where: { id: participantRefId },
+                data: {
+                    savedPlayerId: null,
+                    anonymousParticipantId,
+                },
+                include: {
+                    game: true,
+                    savedPlayer: true,
+                    user: true,
+                    anonymousParticipant: true,
+                },
+            });
+        },
     };
 };

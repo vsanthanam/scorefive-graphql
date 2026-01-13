@@ -11,7 +11,8 @@ type Mutation {
     updateSavedPlayerDisplayName(savedPlayerId: ID!, newDisplayName: String!): SavedPlayer!
     createGame(input: CreateGameInput!): Game!
     addHand(input: AddHandInput!): Hand!
-    deleteGame(id: ID!): Boolean!
+    deleteGame(id: ID!): Boolean
+    deleteSavedPlayer(id: ID!): Boolean
 }
 
 type User implements GameParticipant {
@@ -22,7 +23,8 @@ type User implements GameParticipant {
     createdAt: DateTime!
     updatedAt: DateTime!
     participatingGames: [Game!]!
-    activeParticipatingGames: [Game!]!
+    activeGames: [Game!]!
+    completedGames: [Game!]!
 }
 
 scalar DateTime
@@ -34,21 +36,25 @@ type SavedPlayer implements GameParticipant {
     updatedAt: DateTime!
     owner: User!
     participatingGames: [Game!]!
-    activeParticipatingGames: [Game!]!
+    activeGames: [Game!]!
+    completedGames: [Game!]!
+    canDelete: Boolean!
 }
 
 interface GameParticipant {
     id: ID!
     displayName: String!
     participatingGames: [Game!]!
-    activeParticipatingGames: [Game!]!
+    activeGames: [Game!]!
+    completedGames: [Game!]!
 }
 
 type AnonymousParticipant implements GameParticipant {
     id: ID!
     displayName: String!
     participatingGames: [Game!]!
-    activeParticipatingGames: [Game!]!
+    activeGames: [Game!]!
+    completedGames: [Game!]!
 }
 
 enum GameStatus {

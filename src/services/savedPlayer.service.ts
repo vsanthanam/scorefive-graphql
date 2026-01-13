@@ -1,3 +1,5 @@
+import { anonymousParticipantTable } from '@/db/anonymousParticipant.table';
+import { participantRefTable } from '@/db/participantRef.table';
 import { savedPlayerTable } from '@/db/savedPlayer.table';
 import { type SavedPlayer, buildSavedPlayer } from '@/models/savedPlayer.model';
 
@@ -46,6 +48,28 @@ export class SavedPlayerService {
         }
         const updatedSavedPlayer = await savedPlayerTable(this.context.db).updateSavedPlayerDisplayName(id, newDisplayName);
         return buildSavedPlayer(updatedSavedPlayer, this.context);
+    }
+
+    async deleteSavedPlayerById(id: string): Promise<boolean> {
+        const savedPlayer = await this.savedPlayerById(id);
+        if (!savedPlayer) {
+            throw new Error(`SavedPlayer with ID ${id} not found`);
+        }
+        const canDelete = await this.context.services.game.canDeleteSavedPlayer(savedPlayer);
+        if (!canDelete) {
+            throw new Error('Cannot delete SavedPlayer who is participating in active games');
+        }
+        await this.context.db.$transaction(async (tx) => {
+            for (const metadata of savedPlayer.participationMetadata) {
+                const anonymous = await anonymousParticipantTable(tx).createAnonymousParticipant({
+                    gameId: metadata.gameId,
+                    displayName: savedPlayer.displayName,
+                });
+                await participantRefTable(tx).convertSavedPlayerToAnonymousParticipant(metadata.id, anonymous.id);
+            }
+            await savedPlayerTable(tx).deleteSavedPlayerById(id);
+        });
+        return true;
     }
 
     private readonly context: GraphQLContext;

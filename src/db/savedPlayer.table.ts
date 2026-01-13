@@ -92,5 +92,10 @@ export const savedPlayerTable = (db: DB) => {
                 },
             });
         },
+        async deleteSavedPlayerById(id: string): Promise<void> {
+            await db.savedPlayer.delete({
+                where: { id },
+            });
+        },
     };
 };

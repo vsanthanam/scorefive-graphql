@@ -38,6 +38,13 @@ const mutation: MutationResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async deleteSavedPlayer(_parent, args, context) {
+        try {
+            return await context.services.savedPlayer.deleteSavedPlayerById(args.id);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default mutation;

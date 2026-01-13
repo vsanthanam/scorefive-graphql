@@ -20,11 +20,11 @@ export const anonymousParticipantTable = (db: DB) => {
                 },
             });
         },
-        async createAnonymousParticipant(gameId: string, displayName: string): Promise<AnonymousParticipantRecord> {
+        async createAnonymousParticipant(data: { gameId: string; displayName: string }): Promise<AnonymousParticipantRecord> {
             return db.anonymousParticipant.create({
                 data: {
-                    displayName,
-                    gameId,
+                    displayName: data.displayName,
+                    gameId: data.gameId,
                 },
                 include: {
                     participantRef: true,

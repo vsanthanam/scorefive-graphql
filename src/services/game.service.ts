@@ -42,8 +42,8 @@ export class GameService {
         if (input.gameParticipants.length < 2) {
             throw new Error('A game must have at least two participants');
         }
-        if (input.scoreLimit <= 50) {
-            throw new Error('Score limit must be greater than 50');
+        if (input.scoreLimit < 50) {
+            throw new Error('Score limit must at least 50');
         }
         const id = await this.context.db.$transaction(async (tx) => {
             const newGame = await gameTable(tx).createGame(owner.id, input.scoreLimit);
@@ -59,10 +59,10 @@ export class GameService {
                     await this.context.services.savedPlayer.savedPlayerById(participantInput.savedPlayerId);
                     await participantRefTable(tx).createSavedPlayerParticipantRef(newGame.id, participantInput.savedPlayerId, i);
                 } else if (participantInput.anonymousParticipantDisplayName) {
-                    const anonymousParticipant = await anonymousParticipantTable(tx).createAnonymousParticipant(
-                        newGame.id,
-                        participantInput.anonymousParticipantDisplayName,
-                    );
+                    const anonymousParticipant = await anonymousParticipantTable(tx).createAnonymousParticipant({
+                        gameId: newGame.id,
+                        displayName: participantInput.anonymousParticipantDisplayName,
+                    });
                     await participantRefTable(tx).createAnonymousParticipantRef(newGame.id, anonymousParticipant.id, i);
                 } else {
                     throw new Error('Unknown participant type in input');
@@ -81,16 +81,28 @@ export class GameService {
         );
     }
 
-    async activeParticipatingGamesForUser(user: User): Promise<Game[]> {
+    async activeGamesForUser(user: User): Promise<Game[]> {
         const games = await this.participatingGamesForUser(user);
         const gamesAndStatus = await Promise.all(
             games.map(async (game) => {
                 const status = await this.context.services.gameStatus.gameStatusForGame(game);
-                const isActive = status === GameStatus.Completed;
+                const isActive = status === GameStatus.InProgress;
                 return { game, isActive };
             }),
         );
         return gamesAndStatus.filter((gs) => gs.isActive).map((gs) => gs.game);
+    }
+
+    async completedGamesForUser(user: User): Promise<Game[]> {
+        const games = await this.participatingGamesForUser(user);
+        const gamesAndStatus = await Promise.all(
+            games.map(async (game) => {
+                const status = await this.context.services.gameStatus.gameStatusForGame(game);
+                const isCompleted = status === GameStatus.Completed;
+                return { game, isCompleted };
+            }),
+        );
+        return gamesAndStatus.filter((gs) => gs.isCompleted).map((gs) => gs.game);
     }
 
     async participatingGamesForSavedPlayer(savedPlayer: SavedPlayer): Promise<Game[]> {
@@ -101,23 +113,40 @@ export class GameService {
         );
     }
 
-    async activeParticipatingGamesForSavedPlayer(savedPlayer: SavedPlayer): Promise<Game[]> {
+    async activeGamesForSavedPlayer(savedPlayer: SavedPlayer): Promise<Game[]> {
         const games = await this.participatingGamesForSavedPlayer(savedPlayer);
         const gamesAndStatus = await Promise.all(
             games.map(async (game) => {
                 const status = await this.context.services.gameStatus.gameStatusForGame(game);
-                const isActive = status === GameStatus.Completed;
+                const isActive = status === GameStatus.InProgress;
                 return { game, isActive };
             }),
         );
         return gamesAndStatus.filter((gs) => gs.isActive).map((gs) => gs.game);
     }
 
+    async completedGamesForSavedPlayer(savedPlayer: SavedPlayer): Promise<Game[]> {
+        const games = await this.participatingGamesForSavedPlayer(savedPlayer);
+        const gamesAndStatus = await Promise.all(
+            games.map(async (game) => {
+                const status = await this.context.services.gameStatus.gameStatusForGame(game);
+                const isCompleted = status === GameStatus.Completed;
+                return { game, isCompleted };
+            }),
+        );
+        return gamesAndStatus.filter((gs) => gs.isCompleted).map((gs) => gs.game);
+    }
+
+    async canDeleteSavedPlayer(savedPlayer: SavedPlayer): Promise<boolean> {
+        const activeGames = await this.activeGamesForSavedPlayer(savedPlayer);
+        return activeGames.length === 0;
+    }
+
     async participatingGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game> {
         return await this.gameById(anonymousParticipant.participationMetadata.gameId);
     }
 
-    async activeParticipatingGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game | null> {
+    async activeGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game | null> {
         const game = await this.participatingGameForAnonymousParticipant(anonymousParticipant);
         const status = await this.context.services.gameStatus.gameStatusForGame(game);
         if (status === GameStatus.Completed) {
@@ -126,9 +155,18 @@ export class GameService {
         return game;
     }
 
+    async completedGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game | null> {
+        const game = await this.participatingGameForAnonymousParticipant(anonymousParticipant);
+        const status = await this.context.services.gameStatus.gameStatusForGame(game);
+        if (status === GameStatus.InProgress) {
+            return null;
+        }
+        return game;
+    }
+
     async deleteGame(id: string): Promise<boolean> {
         try {
-            await gameTable(this.context.db).deleteGame(id);
+            await gameTable(this.context.db).deleteGameById(id);
             return true;
         } catch {
             return false;

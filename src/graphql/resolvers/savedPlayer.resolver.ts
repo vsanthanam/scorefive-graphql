@@ -10,9 +10,23 @@ const savedPlayer: SavedPlayerResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
-    async activeParticipatingGames(parent, _args, context) {
+    async activeGames(parent, _args, context) {
         try {
-            return await context.services.game.activeParticipatingGamesForSavedPlayer(parent);
+            return await context.services.game.activeGamesForSavedPlayer(parent);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
+    async completedGames(parent, _args, context) {
+        try {
+            return await context.services.game.completedGamesForSavedPlayer(parent);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
+    async canDelete(parent, _args, context) {
+        try {
+            return await context.services.game.canDeleteSavedPlayer(parent);
         } catch (error) {
             throw new GraphQLError((error as Error).message);
         }

@@ -11,9 +11,17 @@ const anonymousParticipant: AnonymousParticipantResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
-    async activeParticipatingGames(parent, _args, context) {
+    async activeGames(parent, _args, context) {
         try {
-            const game = await context.services.game.activeParticipatingGameForAnonymousParticipant(parent);
+            const game = await context.services.game.activeGameForAnonymousParticipant(parent);
+            return game ? [game] : [];
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
+    async completedGames(parent, _args, context) {
+        try {
+            const game = await context.services.game.completedGameForAnonymousParticipant(parent);
             return game ? [game] : [];
         } catch (error) {
             throw new GraphQLError((error as Error).message);

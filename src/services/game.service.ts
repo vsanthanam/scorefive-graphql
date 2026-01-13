@@ -1,8 +1,8 @@
+import { GameStatus, type CreateGameInput } from '@/__generated__/graphql';
 import { anonymousParticipantTable } from '@/db/anonymousParticipant.table';
 import { gameTable } from '@/db/game.table';
 import { participantRefTable } from '@/db/participantRef.table';
 
-import type { CreateGameInput } from '@/__generated__/graphql';
 import type { GameRecord } from '@/db';
 import type { GraphQLContext } from '@/graphql';
 import type { AnonymousParticipant } from '@/models/anonymousParticipant.model';
@@ -81,6 +81,18 @@ export class GameService {
         );
     }
 
+    async activeParticipatingGamesForUser(user: User): Promise<Game[]> {
+        const games = await this.participatingGamesForUser(user);
+        const gamesAndStatus = await Promise.all(
+            games.map(async (game) => {
+                const status = await this.context.services.gameStatus.gameStatusForGame(game);
+                const isActive = status === GameStatus.Completed;
+                return { game, isActive };
+            }),
+        );
+        return gamesAndStatus.filter((gs) => gs.isActive).map((gs) => gs.game);
+    }
+
     async participatingGamesForSavedPlayer(savedPlayer: SavedPlayer): Promise<Game[]> {
         return await Promise.all(
             savedPlayer.participationMetadata.map(async (pm) => {
@@ -89,8 +101,29 @@ export class GameService {
         );
     }
 
+    async activeParticipatingGamesForSavedPlayer(savedPlayer: SavedPlayer): Promise<Game[]> {
+        const games = await this.participatingGamesForSavedPlayer(savedPlayer);
+        const gamesAndStatus = await Promise.all(
+            games.map(async (game) => {
+                const status = await this.context.services.gameStatus.gameStatusForGame(game);
+                const isActive = status === GameStatus.Completed;
+                return { game, isActive };
+            }),
+        );
+        return gamesAndStatus.filter((gs) => gs.isActive).map((gs) => gs.game);
+    }
+
     async participatingGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game> {
         return await this.gameById(anonymousParticipant.participationMetadata.gameId);
+    }
+
+    async activeParticipatingGameForAnonymousParticipant(anonymousParticipant: AnonymousParticipant): Promise<Game | null> {
+        const game = await this.participatingGameForAnonymousParticipant(anonymousParticipant);
+        const status = await this.context.services.gameStatus.gameStatusForGame(game);
+        if (status === GameStatus.Completed) {
+            return null;
+        }
+        return game;
     }
 
     async deleteGame(id: string): Promise<boolean> {

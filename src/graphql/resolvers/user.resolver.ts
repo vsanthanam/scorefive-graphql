@@ -10,6 +10,13 @@ const user: UserResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async activeParticipatingGames(parent, _args, context) {
+        try {
+            return await context.services.game.activeParticipatingGamesForUser(parent);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default user;

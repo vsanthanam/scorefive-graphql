@@ -22,6 +22,7 @@ type User implements GameParticipant {
     createdAt: DateTime!
     updatedAt: DateTime!
     participatingGames: [Game!]!
+    activeParticipatingGames: [Game!]!
 }
 
 scalar DateTime
@@ -33,18 +34,21 @@ type SavedPlayer implements GameParticipant {
     updatedAt: DateTime!
     owner: User!
     participatingGames: [Game!]!
+    activeParticipatingGames: [Game!]!
 }
 
 interface GameParticipant {
     id: ID!
     displayName: String!
     participatingGames: [Game!]!
+    activeParticipatingGames: [Game!]!
 }
 
 type AnonymousParticipant implements GameParticipant {
     id: ID!
     displayName: String!
     participatingGames: [Game!]!
+    activeParticipatingGames: [Game!]!
 }
 
 enum GameStatus {

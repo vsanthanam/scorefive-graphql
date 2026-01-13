@@ -97,11 +97,11 @@ export const handTable = (db: DB) => {
                 },
             });
         },
-        async createHand(gameId: string, handNumber: number): Promise<HandRecord> {
+        async createHand(data: { gameId: string; handNumber: number }): Promise<HandRecord> {
             return await db.hand.create({
                 data: {
-                    gameId,
-                    handNumber,
+                    gameId: data.gameId,
+                    handNumber: data.handNumber,
                 },
                 include: {
                     game: true,

@@ -56,11 +56,11 @@ export const gameTable = (db: DB) => {
                 },
             });
         },
-        async createGame(ownerId: string, scoreLimit: number): Promise<GameRecord> {
+        async createGame(data: { ownerId: string; scoreLimit: number }): Promise<GameRecord> {
             return db.game.create({
                 data: {
-                    ownerId,
-                    scoreLimit,
+                    ownerId: data.ownerId,
+                    scoreLimit: data.scoreLimit,
                 },
                 include: {
                     owner: true,

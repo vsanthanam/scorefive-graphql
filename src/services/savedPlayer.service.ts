@@ -31,22 +31,25 @@ export class SavedPlayerService {
 
     async createSavedPlayerForViewer(displayName: string): Promise<SavedPlayer> {
         const user = await this.context.services.user.viewer();
-        return this.createSavedPlayer(user, displayName);
+        return this.createSavedPlayer({ owner: user, displayName });
     }
 
-    async createSavedPlayer(owner: User, displayName: string): Promise<SavedPlayer> {
-        if (displayName.length === 0) {
+    async createSavedPlayer(data: { owner: User; displayName: string }): Promise<SavedPlayer> {
+        if (data.displayName.length === 0) {
             throw new Error('Display name cannot be empty');
         }
-        const savedPlayer = await savedPlayerTable(this.context.db).createSavedPlayer(owner.id, displayName);
+        const savedPlayer = await savedPlayerTable(this.context.db).createSavedPlayer({ ownerId: data.owner.id, displayName: data.displayName });
         return buildSavedPlayer(savedPlayer, this.context);
     }
 
-    async updateSavedPlayerDisplayName(id: string, newDisplayName: string): Promise<SavedPlayer> {
-        if (newDisplayName.length === 0) {
+    async updateSavedPlayerDisplayName(data: { id: string; newDisplayName: string }): Promise<SavedPlayer> {
+        if (data.newDisplayName.length === 0) {
             throw new Error('Display name cannot be empty');
         }
-        const updatedSavedPlayer = await savedPlayerTable(this.context.db).updateSavedPlayerDisplayName(id, newDisplayName);
+        const updatedSavedPlayer = await savedPlayerTable(this.context.db).updateSavedPlayerDisplayName({
+            id: data.id,
+            newDisplayName: data.newDisplayName,
+        });
         return buildSavedPlayer(updatedSavedPlayer, this.context);
     }
 
@@ -65,7 +68,10 @@ export class SavedPlayerService {
                     gameId: metadata.gameId,
                     displayName: savedPlayer.displayName,
                 });
-                await participantRefTable(tx).convertSavedPlayerToAnonymousParticipant(metadata.id, anonymous.id);
+                await participantRefTable(tx).convertSavedPlayerToAnonymousParticipant({
+                    participantRefId: metadata.id,
+                    anonymousParticipantId: anonymous.id,
+                });
             }
             await savedPlayerTable(tx).deleteSavedPlayerById(id);
         });

@@ -87,7 +87,7 @@ export class HandService {
         }
         const handNumber = (await this.handsForGame(game)).length + 1;
         const id = await this.context.db.$transaction(async (tx) => {
-            const record = await handTable(tx).createHand(game.id, handNumber);
+            const record = await handTable(tx).createHand({ gameId: game.id, handNumber });
             for (const scoreInput of input.scores) {
                 const participant = game.orderedParticipants.find((participant) => participant.id === scoreInput.participantId);
                 if (!participant) {
@@ -98,15 +98,20 @@ export class HandService {
                     if (!ref) {
                         throw new Error(`Participation metadata not found for user ${participant.id} in game ${game.id}`);
                     }
-                    await scoreTable(tx).createScore(ref.id, record.id, scoreInput.points, game.id);
+                    await scoreTable(tx).createScore({ participantRefId: ref.id, handId: record.id, points: scoreInput.points, gameId: game.id });
                 } else if (participant.__typename === 'SavedPlayer') {
                     const ref = participant.participationMetadata.find((pm) => pm.gameId === game.id);
                     if (!ref) {
                         throw new Error(`Participation metadata not found for saved player ${participant.id} in game ${game.id}`);
                     }
-                    await scoreTable(tx).createScore(ref.id, record.id, scoreInput.points, game.id);
+                    await scoreTable(tx).createScore({ participantRefId: ref.id, handId: record.id, points: scoreInput.points, gameId: game.id });
                 } else {
-                    await scoreTable(tx).createScore(participant.participationMetadata.id, record.id, scoreInput.points, game.id);
+                    await scoreTable(tx).createScore({
+                        participantRefId: participant.participationMetadata.id,
+                        handId: record.id,
+                        points: scoreInput.points,
+                        gameId: game.id,
+                    });
                 }
             }
             return record.id;

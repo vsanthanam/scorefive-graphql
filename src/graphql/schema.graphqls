@@ -1,119 +1,386 @@
+"""
+Root queries for the ScoreFive API.
+"""
 type Query {
+    """
+    Returns the authenticated user. Requires authentication.
+    """
     me: User!
+    """
+    Saved players owned by the authenticated user.
+    """
     mySavedPlayers: [SavedPlayer!]!
+    """
+    Look up a saved player by ID.
+    """
     savedPlayer(id: ID!): SavedPlayer
+    """
+    Games owned by the authenticated user.
+    """
     myGames: [Game!]!
+    """
+    Look up a game by ID.
+    """
     game(id: ID!): Game
+    """
+    Look up a hand by ID.
+    """
     hand(id: ID!): Hand
 }
 
+"""
+Root mutations for the ScoreFive API.
+"""
 type Mutation {
+    """
+    Create a saved player owned by the authenticated user.
+    """
     createSavedPlayer(displayName: String!): SavedPlayer!
+    """
+    Rename a saved player by ID.
+    """
     updateSavedPlayerDisplayName(savedPlayerId: ID!, newDisplayName: String!): SavedPlayer!
+    """
+    Create a new game owned by the authenticated user.
+    """
     createGame(input: CreateGameInput!): Game!
+    """
+    Add a hand (round) to a game.
+    """
     addHand(input: AddHandInput!): Hand!
+    """
+    Delete a game by ID. Returns true on success.
+    """
     deleteGame(id: ID!): Boolean
+    """
+    Delete a saved player by ID when they are not in active games.
+    """
     deleteSavedPlayer(id: ID!): Boolean
+    """
+    Delete a hand by ID when it does not change elimination status.
+    """
     deleteHand(id: ID!): Boolean
 }
 
+"""
+Registered user account.
+"""
 type User implements GameParticipant {
+    """
+    Stable identifier.
+    """
     id: ID!
+    """
+    Public display name.
+    """
     displayName: String!
+    """
+    Email address, if available.
+    """
     emailAddress: String
+    """
+    Whether the email address has been verified.
+    """
     emailVerified: Boolean!
+    """
+    Account creation timestamp.
+    """
     createdAt: DateTime!
+    """
+    Account update timestamp.
+    """
     updatedAt: DateTime!
+    """
+    All games the user participates in.
+    """
     participatingGames: [Game!]!
+    """
+    Participating games that are still in progress.
+    """
     activeGames: [Game!]!
+    """
+    Participating games that are completed.
+    """
     completedGames: [Game!]!
 }
 
+"""
+A date-time string in ISO 8601 format.
+"""
 scalar DateTime
 
+"""
+User-owned saved participant that can be reused across games.
+"""
 type SavedPlayer implements GameParticipant {
+    """
+    Stable identifier.
+    """
     id: ID!
+    """
+    Display name for the saved player.
+    """
     displayName: String!
+    """
+    Creation timestamp.
+    """
     createdAt: DateTime!
+    """
+    Last update timestamp.
+    """
     updatedAt: DateTime!
+    """
+    Owner of this saved player.
+    """
     owner: User!
+    """
+    All games this saved player participates in.
+    """
     participatingGames: [Game!]!
+    """
+    Participating games that are still in progress.
+    """
     activeGames: [Game!]!
+    """
+    Participating games that are completed.
+    """
     completedGames: [Game!]!
+    """
+    True when the saved player is not in any active games.
+    """
     canDelete: Boolean!
 }
 
+"""
+A participant in a game: User, SavedPlayer, or AnonymousParticipant.
+"""
 interface GameParticipant {
+    """
+    Stable identifier.
+    """
     id: ID!
+    """
+    Display name used in game play.
+    """
     displayName: String!
+    """
+    All games this participant is part of.
+    """
     participatingGames: [Game!]!
+    """
+    Participating games that are still in progress.
+    """
     activeGames: [Game!]!
+    """
+    Participating games that are completed.
+    """
     completedGames: [Game!]!
 }
 
+"""
+Ad-hoc participant created for a single game.
+"""
 type AnonymousParticipant implements GameParticipant {
+    """
+    Stable identifier.
+    """
     id: ID!
+    """
+    Display name used in game play.
+    """
     displayName: String!
+    """
+    The game this participant is part of.
+    """
     participatingGames: [Game!]!
+    """
+    The active game for this participant, if still in progress.
+    """
     activeGames: [Game!]!
+    """
+    The completed game for this participant, if finished.
+    """
     completedGames: [Game!]!
 }
 
+"""
+Status computed from active participants and the score limit.
+"""
 enum GameStatus {
+    """
+    More than one active participant remains.
+    """
     IN_PROGRESS
+    """
+    Zero or one active participant remains.
+    """
     COMPLETED
 }
 
+"""
+A game with ordered participants, hands, and totals.
+"""
 type Game {
+    """
+    Stable identifier.
+    """
     id: ID!
+    """
+    Owner (creator) of the game.
+    """
     owner: User!
+    """
+    Points at or above which a participant is eliminated.
+    """
     scoreLimit: Int
+    """
+    Computed status based on active participants.
+    """
     status: GameStatus!
+    """
+    Participants in the turn order used for the game.
+    """
     orderedParticipants: [GameParticipant!]!
+    """
+    Participants whose total points are below the score limit.
+    """
     activeParticipants: [GameParticipant!]!
+    """
+    Winner once the game is completed (errors if still in progress).
+    """
     winner: GameParticipant
+    """
+    Hands played in ascending hand number.
+    """
     hands: [Hand!]!
+    """
+    Total points per participant across all hands.
+    """
     participantScores: [ParticipantScore!]!
+    """
+    Game creation timestamp.
+    """
     createdAt: DateTime!
+    """
+    Last update timestamp.
+    """
     updatedAt: DateTime!
 }
 
+"""
+Input for creating a game.
+"""
 input CreateGameInput {
+    """
+    Score limit (minimum 50).
+    """
     scoreLimit: Int!
+    """
+    Participants in turn order; must include at least two.
+    """
     gameParticipants: [GameParticipantInput!]!
 }
 
+"""
+Specify exactly one participant identifier.
+"""
 input GameParticipantInput @oneOf {
+    """
+    Existing user ID to add as a participant.
+    """
     userId: String
+    """
+    Saved player ID to add as a participant.
+    """
     savedPlayerId: String
+    """
+    Display name for a new anonymous participant.
+    """
     anonymousParticipantDisplayName: String
 }
 
+"""
+A single round of scoring within a game.
+"""
 type Hand {
+    """
+    Stable identifier.
+    """
     id: ID!
+    """
+    The game this hand belongs to.
+    """
     game: Game!
+    """
+    1-based sequence number within the game.
+    """
     handNumber: Int!
+    """
+    Scores recorded for this hand.
+    """
     scores: [HandScore!]!
 }
 
+"""
+Score for a single participant in a hand.
+"""
 type HandScore {
+    """
+    The hand this score belongs to.
+    """
     hand: Hand!
+    """
+    Participant who received the points.
+    """
     participant: GameParticipant!
+    """
+    Points for this hand (0 to 50).
+    """
     points: Int!
 }
 
+"""
+Aggregate score for a participant across the game.
+"""
 type ParticipantScore {
+    """
+    The game for this aggregate score.
+    """
     game: Game!
+    """
+    Participant this total applies to.
+    """
     participant: GameParticipant!
+    """
+    Sum of points across all hands.
+    """
     totalPoints: Int!
 }
 
+"""
+Input for adding a hand to a game.
+"""
 input AddHandInput {
+    """
+    Game ID to add the hand to.
+    """
     gameId: ID!
+    """
+    Scores for every active participant.
+    """
     scores: [HandScoreInput!]!
 }
 
+"""
+Score entry for a participant within a hand.
+"""
 input HandScoreInput {
+    """
+    Participant ID from the game.
+    """
     participantId: ID!
+    """
+    Points for this participant (0 to 50).
+    """
     points: Int!
 }

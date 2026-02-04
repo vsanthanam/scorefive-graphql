@@ -12,5 +12,12 @@ export const scoreTable = (db: DB) => {
                 },
             });
         },
+        async deleteScoresByHandId(handId: string): Promise<void> {
+            await db.score.deleteMany({
+                where: {
+                    handId,
+                },
+            });
+        },
     };
 };

@@ -20,7 +20,7 @@ export type Services = {
     gameStatus: GameStatusService;
 };
 
-export const createServices = (getContext: () => GraphQLContext): Services => {
+export function createServices(getContext: () => GraphQLContext): Services {
     return {
         get user() {
             return new UserService(getContext());
@@ -47,4 +47,4 @@ export const createServices = (getContext: () => GraphQLContext): Services => {
             return new GameStatusService(getContext());
         },
     };
-};
+}

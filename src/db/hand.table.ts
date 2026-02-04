@@ -120,5 +120,54 @@ export const handTable = (db: DB) => {
                 },
             });
         },
+        async deleteHandById(id: string): Promise<void> {
+            await db.hand.delete({
+                where: { id },
+            });
+        },
+        async updateHandNumberForHandId(data: { id: string; handNumber: number }): Promise<HandRecord> {
+            return await db.hand.update({
+                where: { id: data.id },
+                data: { handNumber: data.handNumber },
+                include: {
+                    game: true,
+                    scores: {
+                        include: {
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        },
+        async handByNumberInGame(gameId: string, handNumber: number): Promise<HandRecord | null> {
+            return await db.hand.findFirst({
+                where: {
+                    gameId,
+                    handNumber,
+                },
+                include: {
+                    game: true,
+                    scores: {
+                        include: {
+                            participantRef: {
+                                include: {
+                                    game: true,
+                                    savedPlayer: true,
+                                    user: true,
+                                    anonymousParticipant: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        },
     };
 };

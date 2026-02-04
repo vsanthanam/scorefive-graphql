@@ -38,6 +38,13 @@ const query: QueryResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async hand(_parent, args, context) {
+        try {
+            return await context.services.hand.handById(args.id);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default query;

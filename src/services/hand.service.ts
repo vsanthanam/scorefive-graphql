@@ -119,5 +119,52 @@ export class HandService {
         return await this.handById(id);
     }
 
+    async deleteHandById(id: string): Promise<boolean> {
+        const hand = await this.handById(id);
+        const game = await this.context.services.game.gameById(hand.gameId);
+        const hands = await this.handsForGame(game);
+        const numberOfHands = hands.length;
+        const isLast = hand.handNumber === numberOfHands;
+        if (!isLast) {
+            const countActiveParticipants = (handsToScore: Hand[]) => {
+                const totals = new Map<string, number>();
+                for (const participant of game.orderedParticipants) {
+                    totals.set(participant.id, 0);
+                }
+                for (const scoredHand of handsToScore) {
+                    for (const score of scoredHand.scores) {
+                        totals.set(score.participant.id, (totals.get(score.participant.id) ?? 0) + score.points);
+                    }
+                }
+                let activeCount = 0;
+                for (const participant of game.orderedParticipants) {
+                    const total = totals.get(participant.id) ?? 0;
+                    if (total < game.scoreLimit) {
+                        activeCount++;
+                    }
+                }
+                return activeCount;
+            };
+            const activeParticipantsCount = countActiveParticipants(hands);
+            const activeParticipantsCountAfterDelete = countActiveParticipants(hands.filter((existing) => existing.id !== hand.id));
+            if (activeParticipantsCountAfterDelete !== activeParticipantsCount) {
+                throw new Error('Deleting this hand has changed the number of active participants in the game, which is not allowed');
+            }
+        }
+        return await this.context.db.$transaction(async (tx) => {
+            await scoreTable(tx).deleteScoresByHandId(hand.id);
+            await handTable(tx).deleteHandById(hand.id);
+            if (!isLast) {
+                for (let i = hand.handNumber + 1; i <= numberOfHands; i++) {
+                    const handToUpdate = hands.find((h) => h.handNumber === i);
+                    if (handToUpdate) {
+                        await handTable(tx).updateHandNumberForHandId({ id: handToUpdate.id, handNumber: i - 1 });
+                    }
+                }
+            }
+            return true;
+        });
+    }
+
     private readonly context: GraphQLContext;
 }

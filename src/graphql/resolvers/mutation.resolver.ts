@@ -45,6 +45,13 @@ const mutation: MutationResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async deleteHand(_parent, args, context) {
+        try {
+            return await context.services.hand.deleteHandById(args.id);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default mutation;

@@ -8,7 +8,7 @@ import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPag
 
 import { PrismaClient } from '@/__generated__/prisma/client';
 import resolvers from '@/graphql/resolvers';
-import { introspection } from '@/utils/env';
+import { introspection } from '@/utils/env.utils';
 
 import type { Loaders } from '@/loaders';
 import type { Services } from '@/services';

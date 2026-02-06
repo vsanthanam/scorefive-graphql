@@ -1,5 +1,5 @@
 import { userTable } from '@/db/user.table';
-import { issuerBaseURL } from '@/utils/env';
+import { issuerBaseURL } from '@/utils/env.utils';
 
 import { UserService } from './user.service';
 

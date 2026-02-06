@@ -6,8 +6,8 @@ import figlet from 'figlet';
 import { getPrismaClient } from '@/db';
 import { createApolloServer } from '@/graphql';
 import { createMiddlewares } from '@/server/middleware';
-import { port, logEnvironment } from '@/utils/env';
-import logger from '@/utils/logger';
+import { port, logEnvironment } from '@/utils/env.utils';
+import logger from '@/utils/logger.utils';
 
 const start = async () => {
     const app = express();

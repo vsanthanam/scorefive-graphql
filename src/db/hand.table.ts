@@ -146,11 +146,11 @@ export const handTable = (db: DB) => {
                 },
             });
         },
-        async handByNumberInGame(gameId: string, handNumber: number): Promise<HandRecord | null> {
+        async handByNumberInGame(data: { gameId: string; handNumber: number }): Promise<HandRecord | null> {
             return await db.hand.findFirst({
                 where: {
-                    gameId,
-                    handNumber,
+                    gameId: data.gameId,
+                    handNumber: data.handNumber,
                 },
                 include: {
                     game: true,

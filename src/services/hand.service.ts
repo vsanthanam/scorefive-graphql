@@ -1,6 +1,7 @@
-import { GameStatus, type AddHandInput } from '@/__generated__/graphql';
+import { GameStatus, type AddHandInput, type HandScoreInput, type UpdateHandInput } from '@/__generated__/graphql';
 import { handTable } from '@/db/hand.table';
 import { scoreTable } from '@/db/score.table';
+import { validate } from '@/utils/five';
 
 import type { HandRecord } from '@/db';
 import type { GraphQLContext } from '@/graphql';
@@ -70,21 +71,10 @@ export class HandService {
             if (!participant) {
                 throw new Error(`Participant with ID ${scoreInput.participantId} not found in game ${game.id}`);
             }
-            if (scoreInput.points < 0) {
-                throw new Error('Score points cannot be negative');
-            }
-            if (scoreInput.points > 50) {
-                throw new Error('Score points cannot be greater than 50');
-            }
         }
 
-        const zeroes = input.scores.filter((s) => s.points === 0);
-        if (zeroes.length == 0) {
-            throw new Error('At least one participant must have a score of zero');
-        }
-        if (zeroes.length == input.scores.length) {
-            throw new Error('At least one participant must have a score greater than zero');
-        }
+        validate(input.scores.map((s) => s.points));
+
         const handNumber = (await this.handsForGame(game)).length + 1;
         const id = await this.context.db.$transaction(async (tx) => {
             const record = await handTable(tx).createHand({ gameId: game.id, handNumber });
@@ -120,6 +110,31 @@ export class HandService {
     }
 
     async deleteHandById(id: string): Promise<boolean> {
+        const canDelete = await this.canDeleteHand(id);
+        if (!canDelete) {
+            throw new Error('Cannot delete this hand as it would change the active participants of previous hands');
+        }
+        const hand = await this.handById(id);
+        const game = await this.context.services.game.gameById(hand.gameId);
+        const hands = await this.handsForGame(game);
+        const numberOfHands = hands.length;
+        const isLast = hand.handNumber === numberOfHands;
+        return await this.context.db.$transaction(async (tx) => {
+            await scoreTable(tx).deleteScoresByHandId(hand.id);
+            await handTable(tx).deleteHandById(hand.id);
+            if (!isLast) {
+                for (let i = hand.handNumber + 1; i <= numberOfHands; i++) {
+                    const handToUpdate = hands.find((h) => h.handNumber === i);
+                    if (handToUpdate) {
+                        await handTable(tx).updateHandNumberForHandId({ id: handToUpdate.id, handNumber: i - 1 });
+                    }
+                }
+            }
+            return true;
+        });
+    }
+
+    async canDeleteHand(id: string): Promise<boolean> {
         const hand = await this.handById(id);
         const game = await this.context.services.game.gameById(hand.gameId);
         const hands = await this.handsForGame(game);
@@ -147,23 +162,172 @@ export class HandService {
             };
             const activeParticipantsCount = countActiveParticipants(hands);
             const activeParticipantsCountAfterDelete = countActiveParticipants(hands.filter((existing) => existing.id !== hand.id));
-            if (activeParticipantsCountAfterDelete !== activeParticipantsCount) {
-                throw new Error('Deleting this hand has changed the number of active participants in the game, which is not allowed');
-            }
+            return activeParticipantsCountAfterDelete === activeParticipantsCount;
+        } else {
+            return true;
         }
-        return await this.context.db.$transaction(async (tx) => {
-            await scoreTable(tx).deleteScoresByHandId(hand.id);
-            await handTable(tx).deleteHandById(hand.id);
-            if (!isLast) {
-                for (let i = hand.handNumber + 1; i <= numberOfHands; i++) {
-                    const handToUpdate = hands.find((h) => h.handNumber === i);
-                    if (handToUpdate) {
-                        await handTable(tx).updateHandNumberForHandId({ id: handToUpdate.id, handNumber: i - 1 });
+    }
+
+    async canUpdateHand(data: { id: string; scores: HandScoreInput[] }): Promise<boolean> {
+        const hand = await this.handById(data.id);
+        const game = await this.context.services.game.gameById(hand.gameId);
+        const hands = await this.handsForGame(game);
+        const numberOfHands = hands.length;
+        const isLast = hand.handNumber === numberOfHands;
+
+        const handParticipantIds = new Set(hand.scores.map((score) => score.participant.id));
+        if (handParticipantIds.size < 2) {
+            return false;
+        }
+        if (data.scores.length !== handParticipantIds.size) {
+            return false;
+        }
+
+        const seenParticipantIds = new Set<string>();
+        for (const scoreInput of data.scores) {
+            if (!handParticipantIds.has(scoreInput.participantId)) {
+                return false;
+            }
+            if (seenParticipantIds.has(scoreInput.participantId)) {
+                return false;
+            }
+            seenParticipantIds.add(scoreInput.participantId);
+        }
+        if (seenParticipantIds.size !== handParticipantIds.size) {
+            return false;
+        }
+
+        try {
+            validate(data.scores.map((s) => s.points));
+        } catch {
+            return false;
+        }
+
+        if (isLast) {
+            return true;
+        }
+
+        const handIndex = hands.findIndex((existing) => existing.id === hand.id);
+        if (handIndex === -1) {
+            throw new Error(`Hand with id ${data.id} not found in game ${game.id}`);
+        }
+
+        const participantById = new Map<string, HandScore['participant']>();
+        for (const score of hand.scores) {
+            participantById.set(score.participant.id, score.participant);
+        }
+
+        const updatedScores: HandScore[] = data.scores.map((scoreInput) => {
+            const participant = participantById.get(scoreInput.participantId);
+            if (!participant) {
+                throw new Error(`Participant with ID ${scoreInput.participantId} not found in hand ${hand.id}`);
+            }
+            return {
+                __typename: 'HandScore',
+                participant,
+                points: scoreInput.points,
+                handId: hand.id,
+            };
+        });
+
+        const updatedHands = hands.map((existing) => {
+            if (existing.id === hand.id) {
+                return { ...existing, scores: updatedScores };
+            }
+            return existing;
+        });
+
+        const activeSetsByHand = (handsToScore: Hand[]): Set<string>[] => {
+            const totals = new Map<string, number>();
+            for (const participant of game.orderedParticipants) {
+                totals.set(participant.id, 0);
+            }
+            const activeSets: Set<string>[] = [];
+            for (const scoredHand of handsToScore) {
+                for (const score of scoredHand.scores) {
+                    totals.set(score.participant.id, (totals.get(score.participant.id) ?? 0) + score.points);
+                }
+                const activeSet = new Set<string>();
+                for (const participant of game.orderedParticipants) {
+                    const total = totals.get(participant.id) ?? 0;
+                    if (total < game.scoreLimit) {
+                        activeSet.add(participant.id);
                     }
+                }
+                activeSets.push(activeSet);
+            }
+            return activeSets;
+        };
+
+        const originalActiveSets = activeSetsByHand(hands);
+        const updatedActiveSets = activeSetsByHand(updatedHands);
+
+        const sameSet = (a: Set<string>, b: Set<string>) => {
+            if (a.size !== b.size) {
+                return false;
+            }
+            for (const value of a) {
+                if (!b.has(value)) {
+                    return false;
                 }
             }
             return true;
+        };
+
+        for (let i = handIndex; i < hands.length; i++) {
+            const originalSet = originalActiveSets[i];
+            const updatedSet = updatedActiveSets[i];
+            if (!originalSet || !updatedSet) {
+                return false;
+            }
+            if (!sameSet(originalSet, updatedSet)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    async updateHand(input: UpdateHandInput): Promise<Hand> {
+        const canUpdate = await this.canUpdateHand({ id: input.handId, scores: input.scores });
+        if (!canUpdate) {
+            throw new Error('Cannot update this hand as it would change the active participants of subsequent hands');
+        }
+        const hand = await this.handById(input.handId);
+        const game = await this.context.services.game.gameById(hand.gameId);
+
+        await this.context.db.$transaction(async (tx) => {
+            for (const scoreInput of input.scores) {
+                const participant = game.orderedParticipants.find((p) => p.id === scoreInput.participantId);
+                if (!participant) {
+                    throw new Error(`Participant with ID ${scoreInput.participantId} not found in game ${game.id}`);
+                }
+                if (participant.__typename === 'User') {
+                    const ref = participant.participationMetadata.find((pm) => pm.gameId === game.id);
+                    if (!ref) {
+                        throw new Error(`Participation metadata not found for user ${participant.id} in game ${game.id}`);
+                    }
+                    await scoreTable(tx).updateScorePoints({ participantRefId: ref.id, handId: hand.id, points: scoreInput.points, gameId: game.id });
+                } else if (participant.__typename === 'SavedPlayer') {
+                    const ref = participant.participationMetadata.find((pm) => pm.gameId === game.id);
+                    if (!ref) {
+                        throw new Error(`Participation metadata not found for saved player ${participant.id} in game ${game.id}`);
+                    }
+                    await scoreTable(tx).updateScorePoints({ participantRefId: ref.id, handId: hand.id, points: scoreInput.points, gameId: game.id });
+                } else {
+                    await scoreTable(tx).updateScorePoints({
+                        participantRefId: participant.participationMetadata.id,
+                        handId: hand.id,
+                        points: scoreInput.points,
+                        gameId: game.id,
+                    });
+                }
+            }
         });
+
+        this.context.loaders.handById.clear(hand.id);
+        this.context.loaders.handsForGameId.clear(game.id);
+
+        return await this.handById(hand.id);
     }
 
     private readonly context: GraphQLContext;

@@ -53,13 +53,17 @@ type Mutation {
     """
     deleteGame(id: ID!): Boolean
     """
-    Delete a saved player by ID when they are not in active games.
+    Delete a saved player by ID.
     """
     deleteSavedPlayer(id: ID!): Boolean
     """
-    Delete a hand by ID when it does not change elimination status.
+    Delete a hand by ID.
     """
     deleteHand(id: ID!): Boolean
+    """
+    Update a hand's scores with new values.
+    """
+    updateHand(input: UpdateHandInput!): Hand!
 }
 
 """
@@ -319,6 +323,23 @@ type Hand {
     Scores recorded for this hand.
     """
     scores: [HandScore!]!
+    """
+    Hand creation timestamp.
+    """
+    createdAt: DateTime!
+    """
+    Hand update timestamp.
+    """
+    updatedAt: DateTime!
+    """
+    True when the hand can be safely deleted without unsafely changing elimination status of any participants.
+    """
+    canDelete: Boolean!
+
+    """
+    True when the hand's scores can be updated without unsafely changing elimination status of any participants.
+    """
+    canUpdate(scores: [HandScoreInput!]!): Boolean!
 }
 
 """
@@ -367,6 +388,17 @@ input AddHandInput {
     gameId: ID!
     """
     Scores for every active participant.
+    """
+    scores: [HandScoreInput!]!
+}
+
+input UpdateHandInput {
+    """
+    Hand ID to update.
+    """
+    handId: ID!
+    """
+    Updated scores for every active participant.
     """
     scores: [HandScoreInput!]!
 }

@@ -12,6 +12,19 @@ export const scoreTable = (db: DB) => {
                 },
             });
         },
+        async updateScorePoints(data: { participantRefId: string; handId: string; points: number; gameId: string }): Promise<void> {
+            await db.score.update({
+                where: {
+                    handId_participantRefId: {
+                        handId: data.handId,
+                        participantRefId: data.participantRefId,
+                    },
+                },
+                data: {
+                    points: data.points,
+                },
+            });
+        },
         async deleteScoresByHandId(handId: string): Promise<void> {
             await db.score.deleteMany({
                 where: {

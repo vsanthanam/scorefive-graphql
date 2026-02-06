@@ -1,7 +1,7 @@
 import { GameStatus, type AddHandInput, type HandScoreInput, type UpdateHandInput } from '@/__generated__/graphql';
 import { handTable } from '@/db/hand.table';
 import { scoreTable } from '@/db/score.table';
-import { validate } from '@/utils/five';
+import { validate } from '@/utils/five.utils';
 
 import type { HandRecord } from '@/db';
 import type { GraphQLContext } from '@/graphql';

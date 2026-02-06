@@ -27,6 +27,8 @@
     },
     "private": true,
     "scripts": {
+        "test": "bun test",
+        "test:unit": "bun test src",
         "generate:prisma": "bunx prisma generate",
         "generate:graphql": "graphql-codegen --config codegen.graphql.ts",
         "generate": "bun generate:prisma && bun generate:graphql",

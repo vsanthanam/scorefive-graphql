@@ -7,6 +7,7 @@ export const tokenAlgorithm = process.env.AUTH0_TOKEN_ALGORITHM || 'RS256';
 export const auth0ClientId = process.env.AUTH0_M2M_CLIENT_ID;
 export const auth0ClientSecret = process.env.AUTH0_M2M_CLIENT_SECRET;
 export const production = process.env.NODE_ENV === 'production';
+export const logLevel = process.env.LOG_LEVEL;
 
 export const logEnvironment = () => {
     console.log('Environment Configuration:');

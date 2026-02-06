@@ -1,14 +1,14 @@
 import pino from 'pino';
 
-import { production } from '@/utils/env';
+import { production, logLevel } from '@/utils/env.utils';
 
 const productionLogger = {
-    level: process.env.LOG_LEVEL ?? 'info',
+    level: logLevel ?? 'info',
     base: null,
 };
 
 const debugLogger = {
-    level: process.env.LOG_LEVEL ?? 'debug',
+    level: logLevel ?? 'debug',
     base: null,
 };
 

@@ -59,6 +59,13 @@ const mutation: MutationResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async updateGameName(_parent, args, context) {
+        try {
+            return await context.services.game.updateGameName({ gameId: args.gameId, newName: args.newName ?? null });
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default mutation;

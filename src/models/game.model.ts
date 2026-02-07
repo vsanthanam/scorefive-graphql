@@ -9,4 +9,5 @@ export type Game = {
     scoreLimit: number;
     orderedParticipants: GameParticipant[];
     owner: User;
+    name: string | null;
 };

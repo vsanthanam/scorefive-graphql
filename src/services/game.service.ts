@@ -46,7 +46,11 @@ export class GameService {
             throw new Error('Score limit must at least 50');
         }
         const id = await this.context.db.$transaction(async (tx) => {
-            const newGame = await gameTable(tx).createGame({ ownerId: data.owner.id, scoreLimit: data.input.scoreLimit });
+            const newGame = await gameTable(tx).createGame({
+                ownerId: data.owner.id,
+                scoreLimit: data.input.scoreLimit,
+                gameName: data.input.gameName ?? null,
+            });
             for (let i = 0; i < data.input.gameParticipants.length; i++) {
                 const participantInput = data.input.gameParticipants[i];
                 if (!participantInput) {
@@ -181,7 +185,21 @@ export class GameService {
         }
     }
 
-    async buildGame(record: GameRecord): Promise<Game> {
+    async updateGameName(data: { gameId: string; newName: string | null }): Promise<Game> {
+        const game = await this.context.services.game.gameById(data.gameId);
+        if (!game) {
+            throw new Error(`Game with ID ${data.gameId} not found`);
+        }
+        if (data.newName != null) {
+            if (data.newName.length === 0) {
+                throw new Error('Game name cannot be empty string');
+            }
+        }
+        const updatedRecord = await gameTable(this.context.db).updateGameName(data.gameId, data.newName);
+        return this.buildGame(updatedRecord);
+    }
+
+    private async buildGame(record: GameRecord): Promise<Game> {
         const orderedParticipants = await Promise.all(
             record.participantRefs.map(async (ref) => {
                 const refRecord = await this.context.loaders.participantRefById.load(ref.id);
@@ -200,6 +218,7 @@ export class GameService {
             orderedParticipants,
             owner,
             id: record.id,
+            name: record.name,
         };
     }
 

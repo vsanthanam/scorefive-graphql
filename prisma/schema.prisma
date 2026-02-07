@@ -39,6 +39,7 @@ model Game {
   anonymousParticipants AnonymousParticipant[]
   scoreLimit            Int
   hands                 Hand[]
+  name                  String?                @db.Text
 }
 
 model ParticipantRef {

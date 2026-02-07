@@ -64,6 +64,11 @@ type Mutation {
     Update a hand's scores with new values.
     """
     updateHand(input: UpdateHandInput!): Hand!
+
+    """
+    Update a game's name.
+    """
+    updateGameName(gameId: ID!, newName: String): Game!
 }
 
 """
@@ -269,6 +274,11 @@ type Game {
     Last update timestamp.
     """
     updatedAt: DateTime!
+
+    """
+    The name of the game.
+    """
+    name: String
 }
 
 """
@@ -283,6 +293,10 @@ input CreateGameInput {
     Participants in turn order; must include at least two.
     """
     gameParticipants: [GameParticipantInput!]!
+    """
+    The name of the game (optional).
+    """
+    gameName: String
 }
 
 """

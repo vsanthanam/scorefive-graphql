@@ -56,11 +56,12 @@ export const gameTable = (db: DB) => {
                 },
             });
         },
-        async createGame(data: { ownerId: string; scoreLimit: number }): Promise<GameRecord> {
+        async createGame(data: { ownerId: string; scoreLimit: number; gameName: string | null }): Promise<GameRecord> {
             return db.game.create({
                 data: {
                     ownerId: data.ownerId,
                     scoreLimit: data.scoreLimit,
+                    name: data.gameName,
                 },
                 include: {
                     owner: true,
@@ -75,6 +76,22 @@ export const gameTable = (db: DB) => {
         async deleteGameById(id: string): Promise<void> {
             await db.game.delete({
                 where: { id },
+            });
+        },
+        async updateGameName(id: string, newName: string | null): Promise<GameRecord> {
+            return await db.game.update({
+                where: { id },
+                data: {
+                    name: newName,
+                },
+                include: {
+                    owner: true,
+                    participantRefs: {
+                        orderBy: {
+                            turnOrder: 'asc',
+                        },
+                    },
+                },
             });
         },
     };

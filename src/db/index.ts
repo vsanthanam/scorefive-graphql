@@ -60,6 +60,7 @@ export type ParticipantRefRecord = Prisma.ParticipantRefGetPayload<{
 export type GameRecord = Prisma.GameGetPayload<{
     include: {
         owner: true;
+        name: true;
         participantRefs: true;
     };
 }>;

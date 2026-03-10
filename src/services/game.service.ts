@@ -45,24 +45,24 @@ export class GameService {
         if (data.input.scoreLimit < 50) {
             throw new Error('Score limit must at least 50');
         }
+        for (const participantInput of data.input.gameParticipants) {
+            if (!participantInput) {
+                throw new Error('Invalid participant input');
+            }
+            if (participantInput.userId) {
+                await this.context.services.user.userById(participantInput.userId);
+            } else if (participantInput.savedPlayerId) {
+                await this.context.services.savedPlayer.savedPlayerById(participantInput.savedPlayerId);
+            } else if (!participantInput.anonymousParticipantDisplayName) {
+                throw new Error('Unknown participant type in input');
+            }
+        }
         const id = await this.context.db.$transaction(async (tx) => {
             const newGame = await gameTable(tx).createGame({
                 ownerId: data.owner.id,
                 scoreLimit: data.input.scoreLimit,
                 gameName: data.input.gameName ?? null,
             });
-            for (const participantInput of data.input.gameParticipants) {
-                if (!participantInput) {
-                    throw new Error('Invalid participant input');
-                }
-                if (participantInput.userId) {
-                    await this.context.services.user.userById(participantInput.userId);
-                } else if (participantInput.savedPlayerId) {
-                    await this.context.services.savedPlayer.savedPlayerById(participantInput.savedPlayerId);
-                } else if (!participantInput.anonymousParticipantDisplayName) {
-                    throw new Error('Unknown participant type in input');
-                }
-            }
             for (let i = 0; i < data.input.gameParticipants.length; i++) {
                 const participantInput = data.input.gameParticipants[i];
                 if (!participantInput) {

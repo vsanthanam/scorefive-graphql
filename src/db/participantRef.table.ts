@@ -26,54 +26,35 @@ export const participantRefTable = (db: DB) => {
                 },
             });
         },
-        async createUserParticipantRef(data: { gameId: string; userId: string; turnOrder: number }): Promise<ParticipantRefRecord> {
-            return db.participantRef.create({
+        async createUserParticipantRef(data: { gameId: string; userId: string; turnOrder: number }): Promise<string> {
+            const ref = await db.participantRef.create({
                 data: {
                     gameId: data.gameId,
                     userId: data.userId,
                     turnOrder: data.turnOrder,
                 },
-                include: {
-                    game: true,
-                    savedPlayer: true,
-                    user: true,
-                    anonymousParticipant: true,
-                },
             });
+            return ref.id;
         },
-        async createSavedPlayerParticipantRef(data: { gameId: string; savedPlayerId: string; turnOrder: number }): Promise<ParticipantRefRecord> {
-            return db.participantRef.create({
+        async createSavedPlayerParticipantRef(data: { gameId: string; savedPlayerId: string; turnOrder: number }): Promise<string> {
+            const ref = await db.participantRef.create({
                 data: {
                     gameId: data.gameId,
                     savedPlayerId: data.savedPlayerId,
                     turnOrder: data.turnOrder,
                 },
-                include: {
-                    game: true,
-                    savedPlayer: true,
-                    user: true,
-                    anonymousParticipant: true,
-                },
             });
+            return ref.id;
         },
-        async createAnonymousParticipantRef(data: {
-            gameId: string;
-            anonymousParticipantId: string;
-            turnOrder: number;
-        }): Promise<ParticipantRefRecord> {
-            return db.participantRef.create({
+        async createAnonymousParticipantRef(data: { gameId: string; anonymousParticipantId: string; turnOrder: number }): Promise<string> {
+            const ref = await db.participantRef.create({
                 data: {
                     gameId: data.gameId,
                     anonymousParticipantId: data.anonymousParticipantId,
                     turnOrder: data.turnOrder,
                 },
-                include: {
-                    game: true,
-                    savedPlayer: true,
-                    user: true,
-                    anonymousParticipant: true,
-                },
             });
+            return ref.id;
         },
         async convertSavedPlayerToAnonymousParticipant(data: {
             participantRefId: string;

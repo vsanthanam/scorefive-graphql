@@ -24,6 +24,13 @@ const hand: HandResolvers = {
             throw new GraphQLError((error as Error).message);
         }
     },
+    async statistics(parent, _args, context) {
+        try {
+            return await context.services.handStatistics.handStatisticsForHand(parent);
+        } catch (error) {
+            throw new GraphQLError((error as Error).message);
+        }
+    },
 };
 
 export default hand;

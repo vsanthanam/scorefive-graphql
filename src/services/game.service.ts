@@ -51,16 +51,26 @@ export class GameService {
                 scoreLimit: data.input.scoreLimit,
                 gameName: data.input.gameName ?? null,
             });
+            for (const participantInput of data.input.gameParticipants) {
+                if (!participantInput) {
+                    throw new Error('Invalid participant input');
+                }
+                if (participantInput.userId) {
+                    await this.context.services.user.userById(participantInput.userId);
+                } else if (participantInput.savedPlayerId) {
+                    await this.context.services.savedPlayer.savedPlayerById(participantInput.savedPlayerId);
+                } else if (!participantInput.anonymousParticipantDisplayName) {
+                    throw new Error('Unknown participant type in input');
+                }
+            }
             for (let i = 0; i < data.input.gameParticipants.length; i++) {
                 const participantInput = data.input.gameParticipants[i];
                 if (!participantInput) {
                     throw new Error('Invalid participant input');
                 }
                 if (participantInput.userId) {
-                    await this.context.services.user.userById(participantInput.userId);
                     await participantRefTable(tx).createUserParticipantRef({ gameId: newGame.id, userId: participantInput.userId, turnOrder: i });
                 } else if (participantInput.savedPlayerId) {
-                    await this.context.services.savedPlayer.savedPlayerById(participantInput.savedPlayerId);
                     await participantRefTable(tx).createSavedPlayerParticipantRef({
                         gameId: newGame.id,
                         savedPlayerId: participantInput.savedPlayerId,

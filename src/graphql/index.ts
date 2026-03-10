@@ -7,6 +7,7 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
 
 import { PrismaClient } from '@/__generated__/prisma/client';
+import { loggingPlugin } from '@/graphql/plugins/logging.plugin';
 import resolvers from '@/graphql/resolvers';
 import { introspection } from '@/utils/env.utils';
 
@@ -48,7 +49,7 @@ export const createApolloServer = (httpServer: Server) => {
     const server = new ApolloServer<GraphQLContext>({
         typeDefs,
         resolvers,
-        plugins: [ApolloServerPluginDrainHttpServer({ httpServer }), ...landingPage],
+        plugins: [loggingPlugin(), ApolloServerPluginDrainHttpServer({ httpServer }), ...landingPage],
         introspection,
     });
     return server;

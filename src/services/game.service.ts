@@ -58,7 +58,7 @@ export class GameService {
             }
         }
         const id = await this.context.db.$transaction(async (tx) => {
-            const newGame = await gameTable(tx).createGame({
+            const newGameId = await gameTable(tx).createGame({
                 ownerId: data.owner.id,
                 scoreLimit: data.input.scoreLimit,
                 gameName: data.input.gameName ?? null,
@@ -69,20 +69,20 @@ export class GameService {
                     throw new Error('Invalid participant input');
                 }
                 if (participantInput.userId) {
-                    await participantRefTable(tx).createUserParticipantRef({ gameId: newGame.id, userId: participantInput.userId, turnOrder: i });
+                    await participantRefTable(tx).createUserParticipantRef({ gameId: newGameId, userId: participantInput.userId, turnOrder: i });
                 } else if (participantInput.savedPlayerId) {
                     await participantRefTable(tx).createSavedPlayerParticipantRef({
-                        gameId: newGame.id,
+                        gameId: newGameId,
                         savedPlayerId: participantInput.savedPlayerId,
                         turnOrder: i,
                     });
                 } else if (participantInput.anonymousParticipantDisplayName) {
                     const anonymousParticipant = await anonymousParticipantTable(tx).createAnonymousParticipant({
-                        gameId: newGame.id,
+                        gameId: newGameId,
                         displayName: participantInput.anonymousParticipantDisplayName,
                     });
                     await participantRefTable(tx).createAnonymousParticipantRef({
-                        gameId: newGame.id,
+                        gameId: newGameId,
                         anonymousParticipantId: anonymousParticipant.id,
                         turnOrder: i,
                     });
@@ -90,7 +90,7 @@ export class GameService {
                     throw new Error('Unknown participant type in input');
                 }
             }
-            return newGame.id;
+            return newGameId;
         });
         return this.gameById(id);
     }

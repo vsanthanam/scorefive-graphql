@@ -3,6 +3,7 @@ import { GameService } from '@/services/game.service';
 import { GameParticipantService } from '@/services/gameParticipant.service';
 import { GameStatusService } from '@/services/gameStatus.service';
 import { HandService } from '@/services/hand.service';
+import { HandStatisticsService } from '@/services/handStatistics.service';
 import { ParticipantScoreService } from '@/services/participantScore.service';
 import { SavedPlayerService } from '@/services/savedPlayer.service';
 import { UserService } from '@/services/user.service';
@@ -18,6 +19,7 @@ export type Services = {
     participantScore: ParticipantScoreService;
     gameParticipant: GameParticipantService;
     gameStatus: GameStatusService;
+    handStatistics: HandStatisticsService;
 };
 
 export function createServices(getContext: () => GraphQLContext): Services {
@@ -45,6 +47,9 @@ export function createServices(getContext: () => GraphQLContext): Services {
         },
         get gameStatus() {
             return new GameStatusService(getContext());
+        },
+        get handStatistics() {
+            return new HandStatisticsService(getContext());
         },
     };
 }

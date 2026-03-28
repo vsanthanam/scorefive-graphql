@@ -31,6 +31,7 @@ const config: CodegenConfig = {
                     Hand: '@/models/hand.model#Hand',
                     HandScore: '@/models/handScore.model#HandScore',
                     ParticipantScore: '@/models/partcipantScore.model#ParticipantScore',
+                    HandStatistics: '@/models/handStatistics.model#HandStatistics',
                 },
             },
         },

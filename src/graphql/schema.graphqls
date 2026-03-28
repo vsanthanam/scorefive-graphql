@@ -349,11 +349,14 @@ type Hand {
     True when the hand can be safely deleted without unsafely changing elimination status of any participants.
     """
     canDelete: Boolean!
-
     """
     True when the hand's scores can be updated without unsafely changing elimination status of any participants.
     """
     canUpdate(scores: [HandScoreInput!]!): Boolean!
+    """
+    The statistics of the hand
+    """
+    statistics: HandStatistics!
 }
 
 """
@@ -429,4 +432,30 @@ input HandScoreInput {
     Points for this participant (0 to 50).
     """
     points: Int!
+}
+
+"""
+The statistics of a hand
+"""
+type HandStatistics {
+    """
+    The hand these statistics belong to
+    """
+    hand: Hand!
+    """
+    The winners of the hand
+    """
+    winners: [GameParticipant!]
+    """
+    The losers of a hand
+    """
+    losers: [GameParticipant!]
+    """
+    The average score of the hand
+    """
+    averageScore: Float!
+    """
+    The average non-zero score of the hand
+    """
+    averageNonZeroScore: Float!
 }

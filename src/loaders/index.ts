@@ -3,12 +3,15 @@ import gameById from '@/loaders/gameById.loader';
 import gamesForOwnerId from '@/loaders/gamesForOwnerId.loader';
 import handById from '@/loaders/handById.loader';
 import handsForGameId from '@/loaders/handsForGameId.loader';
+import handStatisticsForHand from '@/loaders/handStatisticsForHand.loader';
 import participantRefById from '@/loaders/participantRefById.loader';
 import savedPlayerById from '@/loaders/savedPlayerById.loader';
 import savedPlayersForOwnerId from '@/loaders/savedPlayersForOwnerId.loader';
 import userById from '@/loaders/userById.loader';
 
 import type { DB, UserRecord, SavedPlayerRecord, AnonymousParticipantRecord, GameRecord, ParticipantRefRecord, HandRecord } from '@/db';
+import type { Hand } from '@/models/hand.model';
+import type { HandStatistics } from '@/models/handStatistics.model';
 import type DataLoader from 'dataloader';
 
 export type Loaders = {
@@ -21,6 +24,7 @@ export type Loaders = {
     gamesForOwnerId: DataLoader<string, GameRecord[]>;
     handById: DataLoader<string, HandRecord | null>;
     handsForGameId: DataLoader<string, HandRecord[]>;
+    handStatisticsForHand: DataLoader<Hand, HandStatistics>;
 };
 
 export const createLoaders = (db: DB): Loaders => {
@@ -34,5 +38,6 @@ export const createLoaders = (db: DB): Loaders => {
         gamesForOwnerId: gamesForOwnerId(db),
         handById: handById(db),
         handsForGameId: handsForGameId(db),
+        handStatisticsForHand: handStatisticsForHand(),
     };
 };
